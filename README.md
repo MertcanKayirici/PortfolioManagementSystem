@@ -129,25 +129,30 @@ This significantly improves user experience and reduces potential errors.
 
 ## ⚙️ Installation
 
-1. Clone the repository
-
+### 1. Clone the repository
 ```bash
 git clone https://github.com/MertcanKayirici/PortfolioManagementSystem.git
 ```
 
-2. Open with **Visual Studio**
+### 2. Open the project
+Open the solution file (`.sln`) with Visual Studio.
 
-3. Configure your database connection in `Web.config`
+### 3. Configure database connection
+Update your connection string in **Web.config**:
 
 ```xml
-data source=YOUR_SERVER_NAME;
-initial catalog=PortfolioDb;
-integrated security=True;
+<connectionStrings>
+  <add name="PortfolioDbEntities"
+       connectionString="Data Source=YOUR_SERVER_NAME;Initial Catalog=PortfolioDb;Integrated Security=True"
+       providerName="System.Data.SqlClient" />
+</connectionStrings>
 ```
 
-4. Run the SQL script to create the database
+### 4. Create the database
+Run the SQL script located in the project to create the database.
 
-5. Start the project
+### 5. Run the project
+Press `F5` or click **Start** in Visual Studio.
 
 ---
 
