@@ -1,0 +1,130 @@
+﻿@model Portfolio.Models.Messages
+
+@{
+    // Use shared admin layout
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    // Page title shown in layout/topbar
+    ViewBag.Title = "Mesaj Detayı";
+}
+
+<style>
+    /* Message content container */
+    .message-box {
+        background: #f8fafc;
+        border-radius: 16px;
+        padding: 16px;
+        line-height: 1.6;
+    }
+
+    /* Status toggle container */
+    .status-wrap {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    /* Status label text */
+    .status-text {
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    /* Read status color */
+    .status-active {
+        color: #198754;
+    }
+
+    /* Unread/new status color */
+    .status-passive {
+        color: #dc3545;
+    }
+</style>
+
+<!-- PAGE HEADER -->
+<div class="mb-4">
+    <h2 class="fw-bold mb-0">📩 Mesaj Detayı</h2>
+</div>
+
+<!-- MESSAGE DETAIL CARD -->
+<div class="card shadow-lg border-0 rounded-4">
+    <div class="card-body p-4">
+
+        <!-- READ / UNREAD STATUS TOGGLE -->
+        <div class="status-wrap">
+            <div class="form-check form-switch m-0">
+                <input class="form-check-input"
+                       type="checkbox"
+                       id="toggleRead"
+                       @(Model.IsRead ? "checked" : "")>
+            </div>
+
+            <!-- Status label -->
+            <span id="statusText"
+                  class="status-text @(Model.IsRead ? "status-active" : "status-passive")">
+                @(Model.IsRead ? "Okundu" : "Yeni")
+            </span>
+        </div>
+
+        <!-- Message metadata -->
+        <p><strong>Ad:</strong> @Model.Name</p>
+        <p><strong>Email:</strong> @Model.Email</p>
+        <p><strong>Konu:</strong> @Model.Subject</p>
+        <p><strong>Tarih:</strong> @Model.SendDate.ToString("dd.MM.yyyy HH:mm")</p>
+
+        <hr />
+
+        <!-- Message content -->
+        <p><strong>Mesaj:</strong></p>
+        <div class="message-box">
+            @Model.MessageContent
+        </div>
+
+        <!-- Back button -->
+        <a href="@Url.Action("Index","AdminMessage")" class="btn btn-secondary mt-3">
+            ← Geri Dön
+        </a>
+
+    </div>
+</div>
+
+<script>
+/*
+    Handles read/unread toggle using AJAX.
+    Sends POST request to server and updates UI dynamically.
+*/
+document.getElementById("toggleRead").addEventListener("change", function () {
+
+    const isChecked = this.checked;
+    const statusText = document.getElementById("statusText");
+
+    fetch('@Url.Action("ToggleRead", "AdminMessage")', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: 'id=@Model.MessageId'
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+
+            // Update UI based on new status
+            if (data.status) {
+                statusText.innerText = "Okundu";
+                statusText.classList.remove("status-passive");
+                statusText.classList.add("status-active");
+            } else {
+                statusText.innerText = "Yeni";
+                statusText.classList.remove("status-active");
+                statusText.classList.add("status-passive");
+            }
+
+        } else {
+            // Basic error handling
+            alert("Hata oluştu");
+        }
+    });
+});
+</script>

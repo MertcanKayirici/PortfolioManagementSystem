@@ -1,0 +1,519 @@
+﻿@model List<Portfolio.Models.Projects>
+
+@{
+    // Use shared admin layout
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    // Page title shown in layout/topbar
+    ViewBag.Title = "Proje Yönetimi";
+}
+
+<style>
+    /* Page header layout */
+    .project-page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Shared card styling */
+    .project-table-card,
+    .filter-card,
+    .mini-stat-card {
+        border: 0;
+        border-radius: 24px;
+        box-shadow: 0 12px 35px rgba(15, 23, 42, 0.06);
+    }
+
+    /* Table header styling */
+    .project-table thead th {
+        font-size: 0.9rem;
+        color: #6b7280;
+        font-weight: 700;
+        border-bottom: 1px solid #eef2f7;
+        background: #f8fafc;
+        padding-top: 14px;
+        padding-bottom: 14px;
+    }
+
+    /* Table body cell spacing */
+    .project-table tbody td {
+        vertical-align: middle;
+        padding-top: 16px;
+        padding-bottom: 16px;
+        border-color: #f1f5f9;
+    }
+
+    /* Table row hover effect */
+    .project-table tbody tr {
+        transition: all 0.2s ease;
+    }
+
+        .project-table tbody tr:hover {
+            background: #fafcff;
+        }
+
+    /* Project info block with thumbnail and title */
+    .project-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 220px;
+    }
+
+    /* Project thumbnail image */
+    .project-thumb {
+        width: 64px;
+        height: 64px;
+        object-fit: cover;
+        border-radius: 14px;
+        border: 1px solid #e5e7eb;
+        flex-shrink: 0;
+        background: #f8fafc;
+    }
+
+    /* Project title text */
+    .project-title {
+        font-weight: 700;
+        color: #111827;
+        line-height: 1.2;
+    }
+
+    /* Featured project badge */
+    .featured-badge {
+        display: inline-block;
+        margin-top: 6px;
+        padding: 0.4rem 0.65rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    /* Short description text */
+    .desc-text {
+        color: #6b7280;
+        font-size: 0.88rem;
+        line-height: 1.45;
+        max-width: 320px;
+    }
+
+    /* Display order badge */
+    .order-badge {
+        padding: 0.45rem 0.7rem;
+        border-radius: 999px;
+        background: #f8fafc;
+        border: 1px solid #e5e7eb;
+        color: #374151;
+        font-size: 0.78rem;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    /* Status switch and label wrapper */
+    .status-wrap {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    /* Status label styling */
+    .status-text {
+        font-size: 0.85rem;
+        font-weight: 600;
+        min-width: 42px;
+    }
+
+    /* Active status color */
+    .status-active {
+        color: #198754;
+    }
+
+    /* Passive status color */
+    .status-passive {
+        color: #6c757d;
+    }
+
+    /* Action button container */
+    .action-buttons {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    /* Shared table action button */
+    .table-action-btn {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+    }
+
+        .table-action-btn i {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            line-height: 1;
+            margin: 0;
+            pointer-events: none;
+        }
+
+    /* Empty state container */
+    .empty-box {
+        text-align: center;
+        padding: 48px 16px;
+        color: #6b7280;
+    }
+
+    /* Rounded filter controls */
+    .live-search-input,
+    .form-select {
+        border-radius: 12px;
+        min-height: 46px;
+    }
+
+    .filter-card .form-control,
+    .filter-card .form-select {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    .filter-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 6px;
+    }
+
+    /* Mobile/tablet alignment improvements */
+    @@media (max-width: 576px) {
+        .project-table td,
+        .project-table th {
+            text-align: center;
+        }
+
+        .project-info {
+            justify-content: center;
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .desc-text {
+            max-width: none;
+        }
+
+        .action-buttons,
+        .status-wrap {
+            justify-content: center;
+        }
+
+        .filter-actions .btn {
+            width: 100%;
+        }
+    }
+</style>
+
+<!-- PAGE HEADER -->
+<div class="project-page-header">
+    <div>
+        <h2 class="fw-bold mb-0">📁 Proje Yönetimi</h2>
+        <small class="text-muted">Projeleri yönet, düzenle, filtrele ve sil</small>
+    </div>
+
+    <!-- Create new project button -->
+    <a href="@Url.Action("Add","AdminProject")" class="btn btn-primary px-3">
+        <i class="bi bi-plus-circle me-1"></i> Yeni Proje
+    </a>
+</div>
+
+<!-- FILTER CARD -->
+<div class="card filter-card mb-4">
+    <div class="card-body p-4">
+        <!-- Filter form for keyword, status, and sorting -->
+        <form method="get" action="@Url.Action("Index", "AdminProject")" id="filterForm">
+            <div class="row g-3">
+                <!-- Live search input -->
+                <div class="col-lg-5 col-md-6">
+                    <label class="form-label fw-semibold">Anlık Ara</label>
+                    <input type="text"
+                           id="liveSearch"
+                           name="keyword"
+                           value="@ViewBag.Keyword"
+                           class="form-control live-search-input"
+                           placeholder="Proje adı veya açıklama ara..." />
+                </div>
+
+                <!-- Status filter -->
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label fw-semibold">Durum</label>
+                    <select name="status" class="form-select">
+                        <option value="">Tümü</option>
+                        <option value="active" @(ViewBag.Status == "active" ? "selected" : "")>Aktif</option>
+                        <option value="passive" @(ViewBag.Status == "passive" ? "selected" : "")>Pasif</option>
+                    </select>
+                </div>
+
+                <!-- Sorting options -->
+                <div class="col-lg-4 col-md-12">
+                    <label class="form-label fw-semibold">Sırala</label>
+                    <select name="sort" class="form-select">
+                        <option value="order_asc" @(ViewBag.Sort == "order_asc" ? "selected" : "")>Sıra Artan</option>
+                        <option value="order_desc" @(ViewBag.Sort == "order_desc" ? "selected" : "")>Sıra Azalan</option>
+                        <option value="name_asc" @(ViewBag.Sort == "name_asc" ? "selected" : "")>Ad A-Z</option>
+                        <option value="name_desc" @(ViewBag.Sort == "name_desc" ? "selected" : "")>Ad Z-A</option>
+                    </select>
+                </div>
+
+                <!-- Filter action buttons -->
+                <div class="col-12">
+                    <div class="filter-actions">
+                        <button type="submit" class="btn btn-primary">
+                            Filtrele
+                        </button>
+                        <a href="@Url.Action("Index", "AdminProject")" class="btn btn-outline-secondary">
+                            Temizle
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Success message shown after delete -->
+@if (TempData["Deleted"] != null)
+{
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: '@TempData["Deleted"]',
+            timer: 1500,
+            showConfirmButton: false
+        });
+    </script>
+}
+
+<!-- MAIN TABLE CARD -->
+<div class="card project-table-card">
+    <div class="card-body p-4">
+        @if (Model != null && Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table project-table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Detay</th>
+                            <th>Proje</th>
+                            <th>Açıklama</th>
+                            <th>Sıra</th>
+                            <th>Durum</th>
+                            <th class="text-end">İşlemler</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <!-- Button to navigate to project section/detail management -->
+                                <td>
+                                    <a href="@Url.Action("Index", "AdminProjectSection", new { projectId = item.ProjectId })"
+                                       class="btn btn-sm btn-outline-primary table-action-btn"
+                                       title="Detay İçeriği">
+                                        <i class="bi bi-layout-text-window-reverse"></i>
+                                    </a>
+                                </td>
+
+                                <!-- Project info with thumbnail and title -->
+                                <td>
+                                    <div class="project-info">
+                                        <img src="@(string.IsNullOrEmpty(item.ThumbnailUrl)
+                                            ? Url.Content("~/Content/img/default-project.jpg")
+                                            : Url.Content(item.ThumbnailUrl))"
+                                             class="project-thumb"
+                                             alt="@item.Title"
+                                             onerror="this.src='@Url.Content("~/Content/img/default-project.jpg")'" />
+
+                                        <div>
+                                            <div class="project-title">@item.Title</div>
+
+                                            @if (item.IsFeatured)
+                                            {
+                                                <span class="featured-badge">Öne Çıkan</span>
+                                            }
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Short description preview -->
+                                <td>
+                                    <div class="desc-text">
+                                        @(string.IsNullOrEmpty(item.ShortDescription)
+                                            ? "-"
+                                            : (item.ShortDescription.Length > 60
+                                                ? item.ShortDescription.Substring(0, 60) + "..."
+                                                : item.ShortDescription))
+                                    </div>
+                                </td>
+
+                                <!-- Display order -->
+                                <td>
+                                    <span class="order-badge">
+                                        @item.DisplayOrder
+                                    </span>
+                                </td>
+
+                                <!-- Active/passive status toggle -->
+                                <td>
+                                    <div class="status-wrap">
+                                        <div class="form-check form-switch m-0">
+                                            <input class="form-check-input toggle-status"
+                                                   type="checkbox"
+                                                   data-id="@item.ProjectId"
+                                                   @(item.IsActive ? "checked" : "")>
+                                        </div>
+
+                                        <span class="status-text @(item.IsActive ? "status-active" : "status-passive")">
+                                            @(item.IsActive ? "Aktif" : "Pasif")
+                                        </span>
+                                    </div>
+                                </td>
+
+                                <!-- Action buttons -->
+                                <td class="text-end">
+                                    <div class="action-buttons">
+                                        <!-- Edit button -->
+                                        <a href="@Url.Action("Edit","AdminProject", new { id = item.ProjectId })"
+                                           class="btn btn-sm btn-outline-warning table-action-btn"
+                                           title="Düzenle">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </a>
+
+                                        <!-- Delete form -->
+                                        <form method="post"
+                                              action="@Url.Action("Delete","AdminProject")"
+                                              class="delete-form m-0">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@item.ProjectId" />
+
+                                            <button type="submit"
+                                                    class="btn btn-sm btn-outline-danger table-action-btn"
+                                                    title="Sil">
+                                                <i class="bi bi-trash3"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <!-- Empty state shown when there are no projects or filter returns no results -->
+            <div class="empty-box">
+                <i class="bi bi-folder fs-1 d-block mb-3"></i>
+                <div class="fw-semibold mb-1">Sonuç bulunamadı</div>
+                <small>Filtre kriterlerine uygun proje yok.</small>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    // Delete confirmation using SweetAlert2
+    document.querySelectorAll('.delete-form').forEach(form => {
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            Swal.fire({
+                title: 'Emin misin?',
+                text: 'Bu proje ve resmi silinecek!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Evet, sil',
+                cancelButtonText: 'Vazgeç',
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+    });
+
+    // AJAX-based status toggle logic
+    document.querySelectorAll(".toggle-status").forEach(el => {
+        el.addEventListener("change", function () {
+            const checkbox = this;
+            const id = checkbox.getAttribute("data-id");
+            const statusText = checkbox.closest(".status-wrap").querySelector(".status-text");
+            const oldState = !checkbox.checked;
+
+            fetch('@Url.Action("Toggle", "AdminProject")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                },
+                body: 'id=' + encodeURIComponent(id)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    if (data.status) {
+                        statusText.textContent = "Aktif";
+                        statusText.classList.remove("status-passive");
+                        statusText.classList.add("status-active");
+                    } else {
+                        statusText.textContent = "Pasif";
+                        statusText.classList.remove("status-active");
+                        statusText.classList.add("status-passive");
+                    }
+                } else {
+                    checkbox.checked = oldState;
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Hata',
+                        text: 'Durum güncellenemedi.'
+                    });
+                }
+            })
+            .catch(() => {
+                checkbox.checked = oldState;
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Hata',
+                    text: 'Bir bağlantı sorunu oluştu.'
+                });
+            });
+        });
+    });
+
+    // Live search auto-submit behavior
+    let searchTimeout;
+    const liveSearch = document.getElementById("liveSearch");
+    const filterForm = document.getElementById("filterForm");
+
+    if (liveSearch) {
+        liveSearch.addEventListener("input", function () {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                filterForm.submit();
+            }, 400);
+        });
+    }
+</script>

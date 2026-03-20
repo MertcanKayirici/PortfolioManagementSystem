@@ -1,0 +1,240 @@
+﻿@model List<Portfolio.Models.LoginLogs>
+
+@{
+    // Use shared admin layout for consistent UI
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    // Page title displayed in layout/topbar
+    ViewBag.Title = "Login Logs";
+}
+
+<style>
+    /* Page header layout (title + description) */
+    .log-page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Shared card styling (table + filter section) */
+    .log-card,
+    .filter-card {
+        border: 0;
+        border-radius: 24px;
+        box-shadow: 0 12px 35px rgba(15, 23, 42, 0.06);
+    }
+
+    /* Table header styling */
+    .log-table thead th {
+        font-size: 0.9rem;
+        color: #6b7280;
+        font-weight: 700;
+        background: #f8fafc;
+        border-bottom: 1px solid #eef2f7;
+        padding-top: 14px;
+        padding-bottom: 14px;
+    }
+
+    /* Table body cell spacing */
+    .log-table tbody td {
+        vertical-align: middle;
+        padding-top: 16px;
+        padding-bottom: 16px;
+        border-color: #f1f5f9;
+    }
+
+    /* Row hover effect */
+    .log-table tbody tr {
+        transition: all 0.2s ease;
+    }
+
+        .log-table tbody tr:hover {
+            background: #fafcff;
+        }
+
+    /* Status badge (success / failure) */
+    .status-badge {
+        padding: 0.48rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 600;
+    }
+
+    /* Rounded inputs for better UI consistency */
+    .live-search-input,
+    .form-select,
+    .form-control {
+        border-radius: 12px;
+    }
+
+    /* Empty state container */
+    .empty-box {
+        text-align: center;
+        padding: 48px 16px;
+        color: #6b7280;
+    }
+
+    /* Mobile responsiveness improvements */
+    @@media (max-width: 576px) {
+        .log-table td,
+        .log-table th {
+            text-align: center;
+        }
+    }
+</style>
+
+<!-- PAGE HEADER -->
+<div class="log-page-header">
+    <div>
+        <h2 class="fw-bold mb-0">🔐 Login Logs</h2>
+        <small class="text-muted">Track admin login and logout activities</small>
+    </div>
+</div>
+
+<!-- FILTER SECTION -->
+<div class="card filter-card mb-4">
+    <div class="card-body p-4">
+
+        <!-- Filter form (GET request for query-based filtering) -->
+        <form method="get" action="@Url.Action("Index", "AdminLoginLog")" id="filterForm">
+            <div class="row g-3">
+
+                <!-- Live search by username -->
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Search</label>
+                    <input type="text"
+                           id="liveSearch"
+                           name="keyword"
+                           value="@ViewBag.Keyword"
+                           class="form-control live-search-input"
+                           placeholder="Search by username..." />
+                </div>
+
+                <!-- Filter by login status -->
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="">All</option>
+                        <option value="success" @(ViewBag.Status == "success" ? "selected" : "")>Success</option>
+                        <option value="fail" @(ViewBag.Status == "fail" ? "selected" : "")>Fail</option>
+                    </select>
+                </div>
+
+                <!-- Start date filter -->
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Start Date</label>
+                    <input type="date"
+                           name="startDate"
+                           value="@ViewBag.StartDate"
+                           class="form-control" />
+                </div>
+
+                <!-- End date filter -->
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">End Date</label>
+                    <input type="date"
+                           name="endDate"
+                           value="@ViewBag.EndDate"
+                           class="form-control" />
+                </div>
+
+                <!-- Filter action buttons -->
+                <div class="col-12 d-flex gap-2 flex-wrap">
+                    <button type="submit" class="btn btn-primary">
+                        Apply Filters
+                    </button>
+
+                    <!-- Reset filters -->
+                    <a href="@Url.Action("Index", "AdminLoginLog")" class="btn btn-outline-secondary">
+                        Reset
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- LOGIN LOG TABLE -->
+<div class="card log-card">
+    <div class="card-body p-4">
+
+        <!-- Check if data exists -->
+        @if (Model != null && Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table log-table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Status</th>
+                            <th>IP Address</th>
+                            <th>Description</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <!-- Username (fallback if null/empty) -->
+                                <td>@(string.IsNullOrWhiteSpace(item.Username) ? "-" : item.Username)</td>
+
+                                <!-- Login status -->
+                                <td>
+                                    @if (item.IsSuccess)
+                                    {
+                                        <span class="badge bg-success status-badge">Success</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger status-badge">Fail</span>
+                                    }
+                                </td>
+
+                                <!-- User IP address -->
+                                <td>@item.IpAddress</td>
+
+                                <!-- Log description (login/logout info) -->
+                                <td>@item.Description</td>
+
+                                <!-- Timestamp -->
+                                <td>@item.CreatedAt.ToString("dd.MM.yyyy HH:mm:ss")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <!-- Empty state UI -->
+            <div class="empty-box">
+                <i class="bi bi-shield-lock fs-1 d-block mb-3"></i>
+                <div class="fw-semibold mb-1">No results found</div>
+                <small>No logs match the current filter criteria.</small>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    // Debounced live search to prevent excessive requests
+    let searchTimeout;
+    const liveSearch = document.getElementById("liveSearch");
+    const filterForm = document.getElementById("filterForm");
+
+    if (liveSearch) {
+        liveSearch.addEventListener("input", function () {
+            clearTimeout(searchTimeout);
+
+            // Wait 600ms before submitting form
+            searchTimeout = setTimeout(() => {
+                filterForm.submit();
+            }, 600);
+        });
+    }
+</script>

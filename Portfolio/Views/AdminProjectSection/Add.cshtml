@@ -1,0 +1,116 @@
+﻿@model Portfolio.Models.ProjectSections
+
+@{
+    // Use shared admin layout
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    // Page title for admin panel
+    ViewBag.Title = "Yeni Bölüm Ekle";
+
+    // ProjectId passed from controller
+    var projectId = ViewBag.ProjectId;
+
+    // Current project data for display
+    var project = ViewBag.Project as Portfolio.Models.Projects;
+}
+
+<!-- PAGE HEADER -->
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h2 class="fw-bold mb-0">➕ Yeni Bölüm Ekle</h2>
+        <small class="text-muted">
+            @(project != null ? project.Title : "")
+        </small>
+    </div>
+</div>
+
+<!-- MAIN FORM CARD -->
+<div class="card shadow-lg border-0 rounded-4">
+    <div class="card-body p-4">
+
+        <!-- Form for creating a new project section -->
+        <form method="post" enctype="multipart/form-data" action="@Url.Action("Add", "AdminProjectSection")">
+            @Html.AntiForgeryToken()
+
+            <!-- Hidden project relation -->
+            <input type="hidden" name="ProjectId" value="@projectId" />
+
+            <!-- TITLE -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Başlık</label>
+                <input type="text" name="Title" class="form-control" required />
+            </div>
+
+            <!-- DESCRIPTION -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Açıklama</label>
+                <textarea name="Description" class="form-control" rows="6"></textarea>
+            </div>
+
+            <!-- BULLET LIST (MULTILINE ITEMS) -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Maddeler</label>
+                <textarea name="BulletList"
+                          class="form-control"
+                          rows="5"
+                          placeholder="Her satıra bir madde yaz"></textarea>
+            </div>
+
+            <!-- IMAGE UPLOAD -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Görsel</label>
+                <input type="file" name="imageFile" class="form-control" />
+            </div>
+
+            <!-- BUTTON CONFIGURATION -->
+            <div class="row">
+                <!-- Button text -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-semibold">Buton Metni</label>
+                    <input type="text" name="ButtonText" class="form-control" />
+                </div>
+
+                <!-- Button URL -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-semibold">Buton Linki</label>
+                    <input type="text" name="ButtonUrl" class="form-control" />
+                </div>
+            </div>
+
+            <!-- SECTION SETTINGS -->
+            <div class="row">
+                <!-- Image position -->
+                <div class="col-md-4 mb-3">
+                    <label class="form-label fw-semibold">Görsel Pozisyonu</label>
+                    <select name="ImagePosition" class="form-select">
+                        <option value="left">Sol</option>
+                        <option value="right">Sağ</option>
+                    </select>
+                </div>
+
+                <!-- Display order -->
+                <div class="col-md-4 mb-3">
+                    <label class="form-label fw-semibold">Sıra</label>
+                    <input type="number" name="DisplayOrder" class="form-control" value="0" />
+                </div>
+
+                <!-- Active/passive status -->
+                <div class="col-md-4 mb-3">
+                    <label class="form-label fw-semibold">Durum</label>
+                    <select name="IsActive" class="form-select">
+                        <option value="true">Aktif</option>
+                        <option value="false">Pasif</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- ACTION BUTTONS -->
+            <button type="submit" class="btn btn-primary">Kaydet</button>
+
+            <a href="@Url.Action("Index", "AdminProjectSection", new { projectId = projectId })"
+               class="btn btn-secondary">
+                Geri Dön
+            </a>
+        </form>
+    </div>
+</div>

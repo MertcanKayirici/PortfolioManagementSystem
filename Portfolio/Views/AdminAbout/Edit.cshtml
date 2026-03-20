@@ -1,0 +1,264 @@
+﻿@model Portfolio.Models.Abouts
+
+@{
+    // Use shared admin layout
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    // Page title shown in layout/topbar
+    ViewBag.Title = "Hakkımda Düzenle";
+
+    // Determine current profile image or fallback to default image
+    var defaultProfileImage = Url.Content(
+        !string.IsNullOrWhiteSpace(Model?.ProfileImageUrl)
+            ? Model.ProfileImageUrl
+            : "~/Content/img/default-profile.jpg"
+    );
+}
+
+<!-- PAGE HEADER -->
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h2 class="fw-bold mb-0">👤 Hakkımda Düzenle</h2>
+        <small class="text-muted">Hakkımda bilgilerini ve profil içeriklerini güncelle</small>
+    </div>
+</div>
+
+<style>
+    /* Main card container */
+    .about-card {
+        border: 0;
+        border-radius: 24px;
+        box-shadow: 0 12px 35px rgba(15,23,42,0.06);
+    }
+
+    /* Small uppercase section title */
+    .section-title {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #6b7280;
+        text-transform: uppercase;
+        margin-bottom: 12px;
+    }
+
+    /* Shared form input styling */
+    .form-control {
+        border-radius: 12px;
+        padding: 10px;
+    }
+
+    /* Preview panel styling */
+    .preview-box {
+        background: #f8fafc;
+        border-radius: 20px;
+    }
+
+    /* Profile image preview */
+    .profile-img {
+        width: 100%;
+        max-height: 260px;
+        object-fit: cover;
+        border-radius: 16px;
+        border: 1px solid #e5e7eb;
+    }
+
+    /* Bottom action bar */
+    .action-bar {
+        border-top: 1px solid #eee;
+        margin-top: 25px;
+        padding-top: 15px;
+    }
+
+    /* CV info box */
+    .cv-box {
+        border-radius: 14px;
+        background: #f8fafc;
+        border: 1px solid #e5e7eb;
+    }
+
+        .cv-box i {
+            font-size: 1.1rem;
+        }
+</style>
+
+<!-- MAIN ABOUT EDIT CARD -->
+<div class="card about-card">
+    <div class="card-body p-4 p-lg-5">
+
+        <!-- Form for updating about section -->
+        <form method="post" action="@Url.Action("Edit","AdminAbout")" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(x => x.AboutId)
+
+            <div class="row g-4">
+
+                <!-- LEFT COLUMN: ABOUT CONTENT -->
+                <div class="col-lg-7">
+
+                    <div class="section-title">Hakkımda Bilgileri</div>
+
+                    <!-- Title input -->
+                    <div class="mb-3">
+                        <label class="fw-semibold">Başlık</label>
+                        <input type="text" name="Title"
+                               class="form-control"
+                               value="@Model.Title"
+                               required />
+                    </div>
+
+                    <!-- Description textarea -->
+                    <div class="mb-3">
+                        <label class="fw-semibold">Açıklama</label>
+                        <textarea name="Description"
+                                  class="form-control"
+                                  rows="7">@Model.Description</textarea>
+                    </div>
+
+                    <!-- CV upload field -->
+                    <div class="mb-3">
+                        <label class="fw-semibold mb-2">CV Yükle</label>
+
+                        <input type="file" name="cvFile" class="form-control mb-2" />
+
+                        <small class="text-muted d-block mb-2">
+                            PDF / DOC / DOCX (max 10MB)
+                        </small>
+
+                        @if (!string.IsNullOrEmpty(Model.CvUrl))
+                        {
+                            <!-- Existing CV information and actions -->
+                            <div class="cv-box d-flex align-items-center justify-content-between flex-wrap gap-2 p-3 mt-2">
+
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-file-earmark-text text-primary"></i>
+                                    <span class="small text-muted">CV yüklü</span>
+                                </div>
+
+                                <div class="d-flex gap-2">
+
+                                    <!-- View current CV -->
+                                    <a href="@Url.Content(Model.CvUrl)"
+                                       target="_blank"
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i> Gör
+                                    </a>
+
+                                    <!-- Delete current CV -->
+                                    <button type="button"
+                                            class="btn btn-outline-danger btn-sm"
+                                            onclick="deleteCv(@Model.AboutId)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                </div>
+
+                <!-- RIGHT COLUMN: PROFILE IMAGE -->
+                <div class="col-lg-5">
+                    <div class="preview-box p-3 shadow-sm border h-100">
+
+                        <div class="section-title">Profil Görseli</div>
+
+                        <!-- Profile image file input -->
+                        <input type="file"
+                               name="profileImageFile"
+                               id="imageInput"
+                               class="form-control mb-3" />
+
+                        <!-- Profile image live preview -->
+                        <img id="previewImage"
+                             src="@defaultProfileImage"
+                             class="profile-img mb-2" />
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- FORM ACTIONS -->
+            <div class="action-bar d-flex gap-2 flex-wrap">
+                <button type="submit" class="btn btn-primary px-4">
+                    Kaydet
+                </button>
+
+                <a href="@Url.Action("Index","Admin")"
+                   class="btn btn-outline-secondary">
+                    Geri Dön
+                </a>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<script>
+    // Live image preview for selected profile image
+    const input = document.getElementById("imageInput");
+    const preview = document.getElementById("previewImage");
+
+    if (input) {
+        input.addEventListener("change", function () {
+            const file = this.files[0];
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    preview.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+</script>
+
+<script>
+    // Deletes current CV file via AJAX request with confirmation dialog
+    function deleteCv(id) {
+        Swal.fire({
+            title: "Emin misin?",
+            text: "CV silinecek!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Evet, sil",
+            cancelButtonText: "Vazgeç",
+            confirmButtonColor: "#dc3545"
+        }).then((result) => {
+            if (result.isConfirmed) {
+
+                fetch('/AdminAbout/DeleteCvAjax', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ aboutId: id })
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+
+                            Swal.fire({
+                                title: "Silindi!",
+                                text: "CV başarıyla silindi",
+                                icon: "success",
+                                timer: 1500,
+                                showConfirmButton: false
+                            });
+
+                            // Refresh page shortly after successful deletion
+                            setTimeout(() => {
+                                location.reload();
+                            }, 1000);
+
+                        } else {
+                            Swal.fire("Hata", "Silme başarısız", "error");
+                        }
+                    });
+            }
+        });
+    }
+</script>
+
+<!-- SweetAlert2 library -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

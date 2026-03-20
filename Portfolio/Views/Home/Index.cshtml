@@ -1,0 +1,1026 @@
+﻿@using Portfolio.Models
+@using System.Linq
+
+@{
+    ViewBag.Title = "Ana Sayfa";
+
+    // Retrieve page data from ViewBag and cast them into strongly-typed objects
+    var about = ViewBag.About as Abouts;
+    var skills = ViewBag.Skills as List<Skills>;
+    var projects = ViewBag.Projects as List<Projects>;
+    var site = ViewBag.SiteSetting as SiteSettings;
+    var socials = ViewBag.SocialMedias as List<SocialMedias>;
+    var skillCategories = ViewBag.SkillCategories as List<SkillCategories>;
+
+    // Separate featured projects from normal active projects
+    var featuredProjects = projects != null
+        ? projects.Where(x => x.IsFeatured && x.IsActive).ToList()
+        : new List<Projects>();
+
+    var normalProjects = projects != null
+        ? projects.Where(x => x.IsActive && !x.IsFeatured).ToList()
+        : new List<Projects>();
+
+    // Retrieve contact section configuration
+    var contactSection = ViewBag.ContactSection as ContactSectionSettings;
+
+    // Calculate dashboard-like statistics for the homepage
+    var activeSkillCount = skills != null ? skills.Count(x => x.IsActive) : 0;
+    var totalProjectCount = projects != null ? projects.Count(x => x.IsActive) : 0;
+}
+
+<style>
+    /* Optimize animated elements for smoother transform/opacity rendering */
+    [data-aos] {
+        will-change: transform, opacity;
+    }
+
+    /* Dark overlay placed on hero background image */
+    .hero-overlay {
+        background: rgba(0, 0, 0, 0.45);
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* CTA button wrapper in hero section */
+    .hero-buttons {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    /* Glass-style secondary button used in hero section */
+    .hero-glass-btn {
+        background: rgba(255,255,255,0.12);
+        border: 1px solid rgba(255,255,255,0.22);
+        color: #fff;
+        backdrop-filter: blur(8px);
+    }
+
+        .hero-glass-btn:hover {
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+        }
+
+    /* Statistics section overlaps hero section slightly */
+    .stats-section {
+        margin-top: -60px;
+        position: relative;
+        z-index: 3;
+    }
+
+    /* Card used for statistic items */
+    .stats-card {
+        background: #fff;
+        border-radius: 22px;
+        padding: 25px;
+        text-align: center;
+        box-shadow: 0 20px 45px rgba(0,0,0,0.08);
+        transition: 0.3s ease;
+        height: 100%;
+    }
+
+        .stats-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 25px 60px rgba(0,0,0,0.12);
+        }
+
+    /* Main numeric value inside stat cards */
+    .stats-number {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #2563eb;
+    }
+
+    /* Label text under stat number */
+    .stats-label {
+        color: #6b7280;
+        font-weight: 500;
+    }
+
+    /* Shared helper text under section headings */
+    .section-mini-text {
+        color: #6b7280;
+        max-width: 640px;
+        margin: 0 auto;
+    }
+
+    /* Card style for skill category boxes */
+    .skill-card {
+        border-radius: 20px;
+        transition: all 0.3s ease;
+    }
+
+        .skill-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+        }
+
+    /* Progress bar background */
+    .progress {
+        height: 10px;
+        border-radius: 12px;
+        background-color: #e9ecef;
+    }
+
+    /* Progress bar fill */
+    .progress-bar {
+        border-radius: 12px;
+    }
+
+    /* Featured projects section wrapper */
+    .featured-section {
+        position: relative;
+    }
+
+    /* Featured project card styling */
+    .featured-card {
+        border-radius: 24px;
+        overflow: hidden;
+        transition: all 0.35s ease;
+        background: #fff;
+    }
+
+        .featured-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 22px 50px rgba(0,0,0,0.12);
+        }
+
+    /* Featured project image area */
+    .featured-image-wrapper {
+        position: relative;
+        height: 280px;
+        overflow: hidden;
+        border-radius: 24px;
+        background: #f1f3f5;
+    }
+
+    .featured-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .featured-card:hover .featured-image {
+        transform: scale(1.08);
+    }
+
+    /* Overlay that appears on hover */
+    .featured-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0,0,0,0.55);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: 0.35s ease;
+    }
+
+    /* Button inside featured project overlay */
+    .featured-overlay-btn {
+        border-radius: 999px;
+        padding: 10px 22px;
+        font-weight: 600;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+        transform: translateY(20px);
+        opacity: 0;
+        transition: 0.35s ease;
+    }
+
+    .featured-card:hover .featured-overlay {
+        opacity: 1;
+    }
+
+    .featured-card:hover .featured-overlay-btn {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    /* Badge for featured projects */
+    .featured-badge {
+        position: absolute;
+        top: 16px;
+        left: 16px;
+        background: linear-gradient(135deg, #f59e0b, #fbbf24);
+        color: #111827;
+        font-weight: 700;
+        font-size: 0.8rem;
+        padding: 8px 14px;
+        border-radius: 999px;
+        box-shadow: 0 8px 20px rgba(245, 158, 11, 0.25);
+        z-index: 2;
+    }
+
+    /* Standard project card styling */
+    .project-card {
+        border-radius: 18px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+        .project-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+        }
+
+    /* Project thumbnail wrapper */
+    .project-image-wrapper {
+        position: relative;
+        height: 220px;
+        background: #f1f3f5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .project-image {
+        width: 100%;
+        height: 220px;
+        object-fit: cover;
+        display: block;
+    }
+
+    /* Fallback UI shown if image fails to load */
+    .project-fallback {
+        display: none;
+        width: 100%;
+        height: 220px;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 20px;
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #495057;
+        background: linear-gradient(135deg, #e9ecef, #dee2e6);
+    }
+
+    /* Technology badges shown inside project cards */
+    .tech-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 10px;
+    }
+
+    .tech-badge {
+        font-size: 0.75rem;
+        padding: 5px 10px;
+        border-radius: 999px;
+        background: #eef2ff;
+        color: #4338ca;
+        font-weight: 600;
+        transition: 0.2s;
+    }
+
+        .tech-badge:hover {
+            background: #4f46e5;
+            color: #fff;
+        }
+
+    /* Profile image in About section */
+    .about-image {
+        max-width: 250px;
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        object-fit: cover;
+    }
+
+    /* Shared social/media link hover effect */
+    .social-link {
+        transition: 0.2s ease;
+    }
+
+        .social-link:hover {
+            opacity: 0.75;
+        }
+
+    /* Subtitle text in contact section */
+    .contact-section-title {
+        max-width: 620px;
+        margin: 0 auto;
+        color: #6b7280;
+    }
+
+    /* Main contact wrapper card */
+    .contact-card {
+        border-radius: 28px;
+        overflow: hidden;
+        background: #fff;
+        box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+    }
+
+    /* Left-side contact information panel */
+    .contact-info-panel {
+        height: 100%;
+        padding: 2rem;
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .contact-info-panel::before {
+            content: "";
+            position: absolute;
+            width: 220px;
+            height: 220px;
+            right: -70px;
+            top: -70px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.06);
+        }
+
+        .contact-info-panel::after {
+            content: "";
+            position: absolute;
+            width: 160px;
+            height: 160px;
+            left: -50px;
+            bottom: -50px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.04);
+        }
+
+    /* Ensures visible content stays above pseudo-elements */
+    .contact-info-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    /* Icon box in contact info panel */
+    .contact-info-icon {
+        width: 54px;
+        height: 54px;
+        border-radius: 18px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255,255,255,0.12);
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+    }
+
+    /* Paragraph text inside contact information panel */
+    .contact-info-text {
+        color: rgba(255,255,255,0.78);
+        line-height: 1.7;
+    }
+
+    /* Small badge under contact description */
+    .contact-mini-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 14px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.10);
+        color: #fff;
+        font-size: 0.85rem;
+        margin-top: 1rem;
+    }
+
+    /* Right-side contact form wrapper */
+    .contact-form-wrap {
+        padding: 2rem;
+        height: 100%;
+    }
+
+    /* Shared form control wrapper */
+    .contact-input-group {
+        position: relative;
+        width: 100%;
+        min-width: 0;
+    }
+
+        .contact-input-group .form-control,
+        .contact-input-group textarea {
+            width: 100%;
+            display: block;
+            border-radius: 16px;
+            padding: 14px 16px 14px 48px;
+            border: 1px solid #e5e7eb;
+            box-shadow: none;
+            transition: all 0.25s ease;
+        }
+
+        .contact-input-group textarea {
+            min-height: 100%;
+            height: 100%;
+            resize: none;
+        }
+
+            .contact-input-group .form-control:focus,
+            .contact-input-group textarea:focus {
+                border-color: #2563eb;
+                box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.10);
+            }
+
+    /* Icon placed inside input controls */
+    .contact-input-icon {
+        position: absolute;
+        top: 50%;
+        left: 16px;
+        transform: translateY(-50%);
+        color: #6b7280;
+        font-size: 1rem;
+        pointer-events: none;
+        z-index: 2;
+    }
+
+    /* Special positioning for textarea icon */
+    .contact-input-group.textarea-group .contact-input-icon {
+        top: 20px;
+        transform: none;
+    }
+
+    /* Submit button for contact form */
+    .contact-send-btn {
+        border-radius: 16px;
+        padding: 14px 18px;
+        font-weight: 700;
+        transition: all 0.25s ease;
+    }
+
+        .contact-send-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 30px rgba(37, 99, 235, 0.18);
+        }
+
+    /* Vertical stack for left-side form controls */
+    .contact-left-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        height: 100%;
+    }
+
+    /* Right-side message box wrapper */
+    .contact-right-message {
+        height: 100%;
+        min-height: 100%;
+    }
+
+        .contact-right-message textarea {
+            min-height: 100%;
+        }
+
+    /* Grid used for mini contact cards */
+    .contact-mini-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    /* Small card for quick contact links */
+    .mini-contact-box {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: #f8fafc;
+        border-radius: 16px;
+        padding: 14px;
+        transition: 0.25s ease;
+        height: 100%;
+    }
+
+        .mini-contact-box i {
+            font-size: 1.2rem;
+            color: #2563eb;
+        }
+
+        .mini-contact-box small {
+            color: #6b7280;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .mini-contact-box p {
+            font-weight: 600;
+            word-break: break-word;
+        }
+
+        .mini-contact-box:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+        }
+
+    /* Responsive adjustments for tablets and mobile devices */
+    @@media (max-width: 991.98px) {
+        .contact-info-panel,
+        .contact-form-wrap {
+            padding: 1.5rem;
+        }
+
+        .contact-right-message {
+            min-height: 220px;
+        }
+
+        .contact-mini-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<!-- HERO SECTION -->
+<section id="hero"
+         class="hero text-center text-white d-flex align-items-center justify-content-center"
+         style="height:100vh; background: url('@(site != null && !string.IsNullOrEmpty(site.HeroBackgroundImageUrl) ? Url.Content(site.HeroBackgroundImageUrl) : Url.Content("~/Content/img/default-hero.jpg"))') center/cover;">
+    <div class="hero-overlay">
+        <div class="container">
+            <!-- Dynamic hero title -->
+            <h1 class="fw-bold display-4">
+                @(site != null ? site.HeroTitle : "Merhaba, Ben Mertcan")
+            </h1>
+
+            <!-- Dynamic hero subtitle -->
+            <p class="lead mb-4">
+                @(site != null ? site.HeroSubtitle : "Backend Developer & Frontend Enthusiast")
+            </p>
+
+            <!-- Hero call-to-action buttons -->
+            <div class="hero-buttons mt-4">
+                <a href="#about" class="btn btn-primary btn-lg px-4">Hakkımda</a>
+                <a href="#projects" class="btn hero-glass-btn btn-lg px-4">Projeleri Gör</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- STATISTICS SECTION -->
+<section class="container stats-section">
+    <div class="row g-4 justify-content-center">
+        <!-- Total active projects -->
+        <div class="col-6 col-md-3" data-aos="fade-up">
+            <div class="stats-card">
+                <div class="stats-number" data-target="@totalProjectCount">0</div>
+                <div class="stats-label">Proje</div>
+            </div>
+        </div>
+
+        <!-- Total active skills -->
+        <div class="col-6 col-md-3" data-aos="fade-up">
+            <div class="stats-card">
+                <div class="stats-number" data-target="@activeSkillCount">0</div>
+                <div class="stats-label">Yetenek</div>
+            </div>
+        </div>
+
+        <!-- Static GPA value -->
+        <div class="col-6 col-md-3" data-aos="fade-up">
+            <div class="stats-card">
+                <div class="stats-number" data-target="3.91">0</div>
+                <div class="stats-label">GNO</div>
+            </div>
+        </div>
+
+        <!-- Static motivation value -->
+        <div class="col-6 col-md-3" data-aos="fade-up">
+            <div class="stats-card">
+                <div class="stats-number" data-target="100">0</div>
+                <div class="stats-label">Motivasyon %</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ABOUT SECTION -->
+<section id="about" class="container my-5 py-4">
+    <div class="row align-items-center g-4" data-aos="fade-up">
+        <!-- Profile image -->
+        <div class="col-md-6 text-center">
+            <img src="@(about != null && !string.IsNullOrEmpty(about.ProfileImageUrl)
+                        ? Url.Content(about.ProfileImageUrl)
+                        : Url.Content("~/Content/img/default-profile.jpg"))"
+                 class="img-fluid rounded-circle shadow about-image"
+                 alt="Profil Fotoğrafı"
+                 onerror="this.src='@Url.Content("~/Content/img/default-profile.jpg")'" />
+        </div>
+
+        <!-- About content -->
+        <div class="col-md-6">
+            <h2 class="fw-bold mb-3">
+                @(about != null ? about.Title : "Hakkımda")
+            </h2>
+
+            <p class="text-muted fs-5">
+                @(about != null ? about.Description : "Hakkımda bilgisi bulunamadı.")
+            </p>
+
+            <!-- About section action buttons -->
+            <div class="d-flex flex-wrap gap-2 mt-2">
+                <a href="#contact" class="btn btn-primary">İletişime Geç</a>
+
+                @if (about != null && !string.IsNullOrEmpty(about.CvUrl))
+                {
+                    <a href="@Url.Content(about.CvUrl)" class="btn btn-outline-dark" download>
+                        CV İndir
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SKILLS SECTION -->
+<section id="skills" class="container my-5 py-4">
+    <h2 class="text-center mb-5 fw-bold">Yeteneklerim</h2>
+
+    <div class="row g-4">
+        @if (skillCategories != null && skillCategories.Any())
+        {
+            foreach (var category in skillCategories)
+            {
+                // Filter active skills belonging to current category
+                var categorySkills = skills != null
+                    ? skills.Where(x => (x.Category ?? "").Trim() == category.CategoryName && x.IsActive).ToList()
+                    : new List<Skills>();
+
+                <div class="col-md-6 col-lg-3" data-aos="fade-up">
+                    <div class="card border-0 shadow-sm h-100 skill-card">
+                        <div class="card-body p-4">
+                            <h5 class="text-center fw-bold mb-4">
+                                @category.DisplayName
+                            </h5>
+
+                            @if (categorySkills.Any())
+                            {
+                                foreach (var item in categorySkills)
+                                {
+                                    <div class="mb-3">
+                                        <!-- Skill name and percentage -->
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <span>@item.Name</span>
+                                            <span>@item.Percentage%</span>
+                                        </div>
+
+                                        <!-- Colored skill progress bar -->
+                                        <div class="progress">
+                                            <div class="progress-bar"
+                                                 role="progressbar"
+                                                 style="width:@(item.Percentage)%; background-color:@(!string.IsNullOrEmpty(category.HexColor) ? category.HexColor : "#0d6efd");">
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <p class="text-muted text-center small mb-0">Henüz skill eklenmedi.</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <p class="text-center text-muted">Skill kategorisi bulunamadı.</p>
+            </div>
+        }
+    </div>
+</section>
+
+<!-- FEATURED PROJECTS SECTION -->
+@if (featuredProjects.Any())
+{
+    <section id="featured-projects" class="container my-5 py-4 featured-section">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold mb-3">Öne Çıkan Projeler</h2>
+            <p class="section-mini-text">
+                Portfolyomdaki en güçlü ve en fazla öne çıkarmak istediğim projeler.
+            </p>
+        </div>
+
+        <div class="row g-4">
+            @foreach (var item in featuredProjects)
+            {
+                <div class="col-lg-6" data-aos="zoom-in-up">
+                    <div class="card border-0 shadow-sm featured-card h-100">
+                        <div class="featured-image-wrapper">
+                            <span class="featured-badge">Öne Çıkan</span>
+
+                            <!-- Featured project image -->
+                            <img src="@(string.IsNullOrEmpty(item.ThumbnailUrl)
+                                        ? Url.Content("~/Content/img/default-project.jpg")
+                                        : Url.Content(item.ThumbnailUrl))"
+                                 class="featured-image"
+                                 alt="@item.Title"
+                                 onerror="this.style.display='none';" />
+
+                            <!-- Hover overlay -->
+                            <div class="featured-overlay">
+                                <a href="/Project/Detail/@item.ProjectId"
+                                   class="btn btn-light fw-semibold featured-overlay-btn">
+                                    Detaylı İncele
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="card-body p-4 p-lg-5 d-flex flex-column">
+                            <h3 class="fw-bold mb-3">@item.Title</h3>
+
+                            <p class="text-muted flex-grow-1 mb-4">
+                                @item.ShortDescription
+                            </p>
+
+                            @if (!string.IsNullOrEmpty(item.Technologies))
+                            {
+                                var techs = item.Technologies.Split(',');
+
+                                <div class="tech-badges mb-3">
+                                    @foreach (var tech in techs)
+                                    {
+                                        <span class="tech-badge">@tech.Trim()</span>
+                                    }
+                                </div>
+                            }
+
+                            <!-- Featured project actions -->
+                            <div class="d-flex flex-wrap gap-2">
+                                <a href="/Project/Detail/@item.ProjectId" class="btn btn-primary">
+                                    Detaylı İncele
+                                </a>
+
+                                @if (!string.IsNullOrEmpty(item.GithubUrl))
+                                {
+                                    <a href="@item.GithubUrl" target="_blank" class="btn btn-outline-dark">
+                                        GitHub
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+}
+
+<!-- NORMAL PROJECTS SECTION -->
+<section id="projects" class="container my-5 py-4">
+    <h2 class="text-center mb-3 fw-bold">Diğer Projeler</h2>
+    <p class="text-center text-muted mb-5">Tüm projelerimi buradan inceleyebilirsin.</p>
+
+    <div class="row">
+        @if (normalProjects.Any())
+        {
+            foreach (var item in normalProjects)
+            {
+                <div class="col-md-6 col-lg-4 mb-4" data-aos="fade-up">
+                    <div class="card border-0 shadow-sm h-100 project-card">
+                        <div class="project-image-wrapper">
+                            <!-- Standard project image -->
+                            <img src="@(string.IsNullOrEmpty(item.ThumbnailUrl)
+                                        ? Url.Content("~/Content/img/default-project.jpg")
+                                        : Url.Content(item.ThumbnailUrl))"
+                                 class="project-image"
+                                 alt="@item.Title"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+
+                            <!-- Fallback block if image cannot be loaded -->
+                            <div class="project-fallback">
+                                @item.Title
+                            </div>
+                        </div>
+
+                        <div class="card-body d-flex flex-column p-4">
+                            <h5 class="fw-bold">@item.Title</h5>
+                            <p class="text-muted flex-grow-1">
+                                @item.ShortDescription
+                            </p>
+
+                            @if (!string.IsNullOrEmpty(item.Technologies))
+                            {
+                                var techs = item.Technologies.Split(',');
+
+                                <div class="tech-badges">
+                                    @foreach (var tech in techs)
+                                    {
+                                        <span class="tech-badge">@tech.Trim()</span>
+                                    }
+                                </div>
+                            }
+
+                            <a href="/Project/Detail/@item.ProjectId"
+                               class="btn btn-outline-primary btn-sm mt-3">
+                                Detaylar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <p class="text-center text-muted">Henüz proje yok.</p>
+            </div>
+        }
+    </div>
+</section>
+
+<!-- CONTACT SECTION -->
+<section id="contact" class="container my-5 py-5">
+    <div class="text-center mb-5">
+        <h2 class="fw-bold mb-3">İletişim</h2>
+        <p class="contact-section-title">
+            Bir proje, iş birliği veya fikir hakkında konuşmak istersen bana mesaj gönderebilirsin.
+        </p>
+    </div>
+
+    <!-- Success feedback after contact form submission -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success text-center rounded-4 shadow-sm mb-4">
+            @TempData["Success"]
+        </div>
+    }
+
+    <div class="contact-card">
+        <div class="row g-0">
+            <!-- Left informational panel -->
+            <div class="col-lg-5">
+                <div class="contact-info-panel">
+                    <div class="contact-info-content">
+                        <div class="contact-info-icon">
+                            <i class="bi bi-chat-dots"></i>
+                        </div>
+
+                        <h3 class="fw-bold mb-3">
+                            @(contactSection != null && !string.IsNullOrWhiteSpace(contactSection.Title)
+                                        ? contactSection.Title
+                                        : "Birlikte bir şeyler üretelim")
+                        </h3>
+
+                        <p class="contact-info-text mb-4">
+                            @(contactSection != null && !string.IsNullOrWhiteSpace(contactSection.Description)
+                                    ? contactSection.Description
+                                    : "Yazılım, portfolyo, proje geliştirme ya da iş fırsatları hakkında benimle iletişime geçebilirsin. Mesajını gördüğümde en kısa sürede dönüş yaparım.")
+                        </p>
+
+                        <div class="contact-mini-badge">
+                            <i class="bi bi-lightning-charge"></i>
+                            <span>
+                                @(contactSection != null && !string.IsNullOrWhiteSpace(contactSection.BadgeText)
+                                        ? contactSection.BadgeText
+                                        : "Açık, net ve hızlı iletişim")
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right contact form and quick contact links -->
+            <div class="col-lg-7">
+                <div class="contact-form-wrap">
+                    <form method="post" action="@Url.Action("Send", "Contact")">
+                        <div class="row g-3 align-items-stretch">
+                            <div class="col-lg-6">
+                                <div class="contact-left-stack">
+                                    <!-- Name input -->
+                                    <div class="contact-input-group">
+                                        <i class="bi bi-person contact-input-icon"></i>
+                                        <input type="text"
+                                               name="name"
+                                               class="form-control"
+                                               placeholder="Adınız"
+                                               required />
+                                    </div>
+
+                                    <!-- Email input -->
+                                    <div class="contact-input-group">
+                                        <i class="bi bi-envelope contact-input-icon"></i>
+                                        <input type="email"
+                                               name="email"
+                                               class="form-control"
+                                               placeholder="E-posta"
+                                               required />
+                                    </div>
+
+                                    <!-- Subject input -->
+                                    <div class="contact-input-group">
+                                        <i class="bi bi-bookmark contact-input-icon"></i>
+                                        <input type="text"
+                                               name="subject"
+                                               class="form-control"
+                                               placeholder="Konu"
+                                               required />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <!-- Message textarea -->
+                                <div class="contact-input-group textarea-group contact-right-message">
+                                    <i class="bi bi-pencil-square contact-input-icon"></i>
+                                    <textarea name="message"
+                                              class="form-control h-100"
+                                              placeholder="Mesajınızı yazın..."
+                                              required></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Submit button -->
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary btn-lg w-100 contact-send-btn">
+                                    <i class="bi bi-send me-2"></i>Mesaj Gönder
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Mini contact cards -->
+                    <div class="contact-mini-grid mt-4">
+                        <a href="@(contactSection?.Box1Url ?? "#")" class="mini-contact-box text-decoration-none" target="_blank">
+                            <i class="bi @(contactSection?.Box1Icon ?? "bi-envelope")"></i>
+                            <div>
+                                <small>@(contactSection?.Box1Title ?? "E-posta")</small>
+                                <p class="mb-0">@(contactSection?.Box1Text ?? "a@mail.com")</p>
+                            </div>
+                        </a>
+
+                        <a href="@(contactSection?.Box2Url ?? "#")" class="mini-contact-box text-decoration-none" target="_blank">
+                            <i class="bi @(contactSection?.Box2Icon ?? "bi-envelope")"></i>
+                            <div>
+                                <small>@(contactSection?.Box2Title ?? "Github")</small>
+                                <p class="mb-0">@(contactSection?.Box2Text ?? "github.com/")</p>
+                            </div>
+                        </a>
+
+                        <a href="@(contactSection?.Box3Url ?? "#")" class="mini-contact-box text-decoration-none" target="_blank">
+                            <i class="bi @(contactSection?.Box3Icon ?? "bi-envelope")"></i>
+                            <div>
+                                <small>@(contactSection?.Box3Title ?? "LinkedIn")</small>
+                                <p class="mb-0">@(contactSection?.Box3Text ?? "linkedin.com/in/")</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section scripts {
+    <!-- AOS animation library -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        // Initialize AOS scroll animations
+        AOS.init({
+            duration: 900,
+            once: true,
+            offset: 80
+        });
+
+        // Select all stat counters
+        const counters = document.querySelectorAll('.stats-number');
+
+        // Animate counter values when the stats section becomes visible
+        const animateCounters = () => {
+            counters.forEach(counter => {
+                const target = parseFloat(counter.getAttribute('data-target'));
+                let current = 0;
+                const increment = target / 100;
+
+                const update = () => {
+                    current += increment;
+
+                    if (current < target) {
+                        counter.innerText = target % 1 !== 0
+                            ? current.toFixed(2)
+                            : Math.floor(current);
+                        requestAnimationFrame(update);
+                    } else {
+                        counter.innerText = target;
+                    }
+                };
+
+                update();
+            });
+        };
+
+        // Trigger counter animation only once when the section enters viewport
+        let triggered = false;
+
+        window.addEventListener('scroll', () => {
+            const section = document.querySelector('.stats-section');
+
+            if (!section) return;
+
+            const top = section.getBoundingClientRect().top;
+
+            if (top < window.innerHeight - 100 && !triggered) {
+                animateCounters();
+                triggered = true;
+            }
+        });
+    </script>
+}

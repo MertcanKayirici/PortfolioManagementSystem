@@ -1,0 +1,527 @@
+﻿@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "Dashboard";
+}
+
+<style>
+    .dashboard-hero {
+        position: relative;
+        overflow: hidden;
+        border-radius: 28px;
+        padding: 32px;
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 45%, #2563eb 100%);
+        color: #fff;
+        box-shadow: 0 18px 45px rgba(15, 23, 42, 0.14);
+    }
+
+        .dashboard-hero::before {
+            content: "";
+            position: absolute;
+            top: -70px;
+            right: -60px;
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.07);
+        }
+
+        .dashboard-hero::after {
+            content: "";
+            position: absolute;
+            bottom: -60px;
+            left: -40px;
+            width: 170px;
+            height: 170px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.05);
+        }
+
+    .dashboard-hero-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .dashboard-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 14px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.12);
+        color: #fff;
+        font-size: 0.84rem;
+        font-weight: 600;
+        margin-bottom: 14px;
+    }
+
+    .dashboard-title {
+        font-size: 1.9rem;
+        font-weight: 800;
+        margin-bottom: 8px;
+        line-height: 1.2;
+    }
+
+    .dashboard-subtitle {
+        margin: 0;
+        max-width: 720px;
+        color: rgba(255,255,255,0.82);
+        line-height: 1.7;
+    }
+
+    .dashboard-card {
+        border: 0;
+        border-radius: 24px;
+        overflow: hidden;
+        transition: all 0.28s ease;
+        box-shadow: 0 14px 30px rgba(15, 23, 42, 0.10);
+        height: 100%;
+    }
+
+        .dashboard-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 22px 45px rgba(15, 23, 42, 0.14);
+        }
+
+        .dashboard-card .card-body {
+            padding: 24px;
+        }
+
+    .dashboard-mini-text {
+        font-size: 0.92rem;
+        opacity: 0.88;
+    }
+
+    .dashboard-icon {
+        width: 58px;
+        height: 58px;
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        flex-shrink: 0;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+    }
+
+    .dashboard-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 28px;
+        height: 28px;
+        padding: 0 10px;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        background: rgba(255,255,255,0.18);
+        color: #fff;
+    }
+
+    .dashboard-card-title {
+        font-size: 1.18rem;
+        font-weight: 700;
+        margin: 8px 0 0 0;
+    }
+
+    .dashboard-card-actions {
+        margin-top: 24px;
+    }
+
+    .stat-card {
+        border: 0;
+        border-radius: 22px;
+        background: #fff;
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.06);
+        transition: all 0.25s ease;
+        height: 100%;
+    }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 18px 35px rgba(15, 23, 42, 0.10);
+        }
+
+    .stat-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        margin: 0 auto 14px;
+    }
+
+    .stat-label {
+        font-size: 0.92rem;
+        color: #6b7280;
+        margin-bottom: 4px;
+    }
+
+    .stat-value {
+        font-size: 1.9rem;
+        font-weight: 800;
+        line-height: 1;
+        margin: 0;
+    }
+
+    .quick-links-card {
+        border: 0;
+        border-radius: 24px;
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.06);
+        height: 100%;
+    }
+
+    .quick-links-title {
+        font-weight: 800;
+        margin-bottom: 4px;
+    }
+
+    .quick-links-subtitle {
+        color: #6b7280;
+        font-size: 0.92rem;
+        margin-bottom: 18px;
+    }
+
+    .quick-link-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 16px;
+        border-radius: 16px;
+        text-decoration: none;
+        color: #212529;
+        transition: all 0.2s ease;
+        background: #f8fafc;
+    }
+
+        .quick-link-item:hover {
+            background: #eef2ff;
+            color: #111827;
+            transform: translateX(4px);
+        }
+
+    .quick-link-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .quick-link-badge {
+        width: 42px;
+        height: 42px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+
+    .quick-link-name {
+        font-weight: 700;
+        margin-bottom: 2px;
+    }
+
+    .quick-link-desc {
+        color: #6b7280;
+        font-size: 0.85rem;
+    }
+
+    @@media (max-width: 991.98px) {
+        .dashboard-hero {
+            padding: 24px;
+        }
+
+        .dashboard-title {
+            font-size: 1.55rem;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .dashboard-hero {
+            padding: 20px;
+            border-radius: 22px;
+        }
+
+        .dashboard-title {
+            font-size: 1.35rem;
+        }
+
+        .dashboard-card .card-body,
+        .quick-links-card .card-body,
+        .stat-card {
+            border-radius: 20px;
+        }
+
+        .dashboard-card-actions .btn {
+            width: 100%;
+            margin-bottom: 8px;
+        }
+
+            .dashboard-card-actions .btn:last-child {
+                margin-bottom: 0;
+            }
+    }
+</style>
+
+<!-- HERO -->
+<div class="dashboard-hero mb-4">
+    <div class="dashboard-hero-content">
+        <div class="dashboard-kicker">
+            <i class="bi bi-stars"></i>
+            <span>Admin Panel</span>
+        </div>
+
+        <h2 class="dashboard-title">Dashboard</h2>
+
+        <p class="dashboard-subtitle">
+            Yönetim paneline hoş geldin 👋 İçeriklerini buradan düzenleyebilir, mesajlarını kontrol edebilir ve site alanlarını hızlıca yönetebilirsin.
+        </p>
+    </div>
+</div>
+
+<!-- MAIN FEATURE CARDS -->
+<div class="row g-4">
+
+    <!-- Skill management -->
+    <div class="col-md-6 col-xl-4">
+        <div class="card dashboard-card text-white"
+             style="background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);">
+            <div class="card-body d-flex flex-column justify-content-between">
+                <div class="d-flex justify-content-between align-items-start gap-3">
+                    <div>
+                        <div class="dashboard-mini-text">Skill Yönetimi</div>
+                        <h3 class="dashboard-card-title">Yetenekler</h3>
+                    </div>
+
+                    <div class="dashboard-icon bg-white text-primary">
+                        <i class="bi bi-bar-chart-line-fill"></i>
+                    </div>
+                </div>
+
+                <div class="dashboard-card-actions">
+                    <a href="@Url.Action("Index", "AdminSkill")" class="btn btn-light btn-sm px-3 me-2">
+                        Skills
+                    </a>
+                    <a href="@Url.Action("Index", "AdminSkillCategory")" class="btn btn-outline-light btn-sm px-3">
+                        Kategoriler
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Project management -->
+    <div class="col-md-6 col-xl-4">
+        <div class="card dashboard-card text-dark"
+             style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);">
+            <div class="card-body d-flex flex-column justify-content-between">
+                <div class="d-flex justify-content-between align-items-start gap-3">
+                    <div>
+                        <div class="dashboard-mini-text">Proje Yönetimi</div>
+                        <h3 class="dashboard-card-title">Projeler</h3>
+                    </div>
+
+                    <div class="dashboard-icon bg-dark text-warning">
+                        <i class="bi bi-folder-fill"></i>
+                    </div>
+                </div>
+
+                <div class="dashboard-card-actions">
+                    <a href="@Url.Action("Index", "AdminProject")" class="btn btn-dark btn-sm px-3">
+                        Yönet
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Message management -->
+    <div class="col-md-6 col-xl-4">
+        <div class="card dashboard-card text-white"
+             style="background: linear-gradient(135deg, #059669 0%, #10b981 100%);">
+            <div class="card-body d-flex flex-column justify-content-between">
+                <div class="d-flex justify-content-between align-items-start gap-3">
+                    <div>
+                        <div class="dashboard-mini-text">Mesaj Yönetimi</div>
+                        <h3 class="dashboard-card-title d-flex align-items-center gap-2 flex-wrap">
+                            Mesajlar
+                            @if (ViewBag.UnreadMessageCount != null && ViewBag.UnreadMessageCount > 0)
+                            {
+                                <span class="dashboard-pill">
+                                    @ViewBag.UnreadMessageCount yeni
+                                </span>
+                            }
+                        </h3>
+                    </div>
+
+                    <div class="dashboard-icon bg-white text-success">
+                        <i class="bi bi-envelope-fill"></i>
+                    </div>
+                </div>
+
+                <div class="dashboard-card-actions">
+                    <a href="@Url.Action("Index", "AdminMessage")" class="btn btn-light btn-sm px-3">
+                        Yönet
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- STATS + QUICK LINKS -->
+<div class="row mt-4 g-4">
+
+    <!-- STATS -->
+    <div class="col-xl-8">
+        <div class="row g-4">
+
+            <div class="col-sm-6 col-lg-4">
+                <div class="stat-card text-center p-4">
+                    <div class="stat-icon bg-primary text-white">
+                        <i class="bi bi-bar-chart"></i>
+                    </div>
+                    <div class="stat-label">Toplam Skill</div>
+                    <h3 class="stat-value text-primary">@ViewBag.SkillCount</h3>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-lg-4">
+                <div class="stat-card text-center p-4">
+                    <div class="stat-icon bg-warning text-dark">
+                        <i class="bi bi-folder"></i>
+                    </div>
+                    <div class="stat-label">Toplam Proje</div>
+                    <h3 class="stat-value text-warning">@ViewBag.ProjectCount</h3>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-lg-4">
+                <div class="stat-card text-center p-4">
+                    <div class="stat-icon bg-success text-white">
+                        <i class="bi bi-envelope"></i>
+                    </div>
+                    <div class="stat-label">Toplam Mesaj</div>
+                    <h3 class="stat-value text-success">@ViewBag.MessageCount</h3>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-lg-6">
+                <div class="stat-card text-center p-4">
+                    <div class="stat-icon bg-danger text-white">
+                        <i class="bi bi-envelope-exclamation"></i>
+                    </div>
+                    <div class="stat-label">Yeni Mesaj</div>
+                    <h3 class="stat-value text-danger">@ViewBag.UnreadMessageCount</h3>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-lg-6">
+                <div class="stat-card text-center p-4">
+                    <div class="stat-icon bg-dark text-white">
+                        <i class="bi bi-check-circle"></i>
+                    </div>
+                    <div class="stat-label">Aktif Skill</div>
+                    <h3 class="stat-value text-dark">@ViewBag.ActiveSkill</h3>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- QUICK LINKS -->
+    <div class="col-xl-4">
+        <div class="card quick-links-card">
+            <div class="card-body p-4">
+                <h5 class="quick-links-title">Hızlı Erişim</h5>
+                <div class="quick-links-subtitle">Sık kullanılan yönetim alanlarına hızlı geçiş</div>
+
+                <div class="d-grid gap-3">
+
+                    <a href="@Url.Action("Edit", "AdminAbout")" class="quick-link-item">
+                        <div class="quick-link-left">
+                            <div class="quick-link-badge bg-light text-primary">
+                                <i class="bi bi-person-badge"></i>
+                            </div>
+                            <div>
+                                <div class="quick-link-name">Hakkımda</div>
+                                <div class="quick-link-desc">Profil alanını düzenle</div>
+                            </div>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+
+                    <a href="@Url.Action("Edit", "AdminSiteSettings")" class="quick-link-item">
+                        <div class="quick-link-left">
+                            <div class="quick-link-badge bg-light text-warning">
+                                <i class="bi bi-image"></i>
+                            </div>
+                            <div>
+                                <div class="quick-link-name">Site Ayarları</div>
+                                <div class="quick-link-desc">Hero ve genel alanlar</div>
+                            </div>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+
+                    <a href="@Url.Action("Edit", "AdminContactSection")" class="quick-link-item">
+                        <div class="quick-link-left">
+                            <div class="quick-link-badge bg-light text-info">
+                                <i class="bi bi-chat-left-text"></i>
+                            </div>
+                            <div>
+                                <div class="quick-link-name">İletişim Alanı</div>
+                                <div class="quick-link-desc">İletişim bölümünü düzenle</div>
+                            </div>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+
+                    <a href="@Url.Action("Index", "AdminMessage")" class="quick-link-item">
+                        <div class="quick-link-left">
+                            <div class="quick-link-badge bg-light text-danger">
+                                <i class="bi bi-envelope"></i>
+                            </div>
+                            <div>
+                                <div class="quick-link-name">Mesajlar</div>
+                                <div class="quick-link-desc">Yeni mesajları kontrol et</div>
+                            </div>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+
+                    <a href="@Url.Action("Index", "AdminLoginLog")" class="quick-link-item">
+                        <div class="quick-link-left">
+                            <div class="quick-link-badge bg-light text-dark">
+                                <i class="bi bi-shield-lock"></i>
+                            </div>
+                            <div>
+                                <div class="quick-link-name">Giriş Logları</div>
+                                <div class="quick-link-desc">Giriş hareketlerini incele</div>
+                            </div>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+
+                    <a href="@Url.Action("Index", "Home")" class="quick-link-item">
+                        <div class="quick-link-left">
+                            <div class="quick-link-badge bg-light text-success">
+                                <i class="bi bi-globe2"></i>
+                            </div>
+                            <div>
+                                <div class="quick-link-name">Siteyi Gör</div>
+                                <div class="quick-link-desc">Ön yüzü aç</div>
+                            </div>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

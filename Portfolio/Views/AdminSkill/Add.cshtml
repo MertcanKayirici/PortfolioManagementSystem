@@ -1,0 +1,224 @@
+﻿@{
+    // Use shared admin layout
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    // Page title shown in layout/topbar
+    ViewBag.Title = "Yeni Skill Ekle";
+}
+
+<style>
+    /* Main form card container */
+    .form-card {
+        border-radius: 24px;
+        border: 0;
+        box-shadow: 0 12px 35px rgba(15, 23, 42, 0.06);
+    }
+
+    /* Shared label styling */
+    .form-label {
+        font-weight: 600;
+    }
+
+    /* Shared input/select styling */
+    .form-control,
+    .form-select {
+        border-radius: 14px;
+        padding: 10px 12px;
+    }
+
+        .form-control:focus,
+        .form-select:focus {
+            box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.15);
+            border-color: #2563eb;
+        }
+
+    /* Section titles inside form */
+    .form-section-title {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #6b7280;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    /* Status toggle container */
+    .status-switch {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    /* Status label text */
+    .status-text {
+        font-weight: 600;
+    }
+
+    /* Active state color */
+    .status-active {
+        color: #198754;
+    }
+
+    /* Passive state color */
+    .status-passive {
+        color: #6c757d;
+    }
+
+    /* Form action button container */
+    .form-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    /* Mobile layout for action buttons */
+    @@media (max-width: 576px) {
+        .form-actions {
+            flex-direction: column;
+        }
+
+            .form-actions .btn {
+                width: 100%;
+            }
+    }
+</style>
+
+<!-- PAGE HEADER -->
+<div class="mb-4">
+    <h2 class="fw-bold mb-1">➕ Yeni Skill Ekle</h2>
+    <small class="text-muted">Yeni bir yetenek kaydı oluştur</small>
+</div>
+
+<!-- CREATE FORM CARD -->
+<div class="card form-card">
+    <div class="card-body p-4">
+
+        <!-- Form for creating a new skill -->
+        <form method="post" action="@Url.Action("Add","AdminSkill")">
+            @Html.AntiForgeryToken()
+
+            <div class="row g-4">
+
+                <!-- LEFT COLUMN -->
+                <div class="col-lg-8">
+
+                    <!-- GENERAL INFORMATION -->
+                    <div>
+                        <div class="form-section-title">Genel Bilgiler</div>
+
+                        <!-- Skill name input -->
+                        <div class="mb-3">
+                            <label class="form-label">Skill Adı</label>
+                            <input name="Name"
+                                   class="form-control form-control-lg"
+                                   placeholder="Örn: ASP.NET Core"
+                                   required />
+                        </div>
+
+                        <!-- Category selection -->
+                        <div class="mb-3">
+                            <label class="form-label">Kategori</label>
+
+                            <select name="Category" class="form-select">
+                                @foreach (var cat in ViewBag.Categories)
+                                {
+                                    <option value="@cat.CategoryName">
+                                        @cat.DisplayName
+                                    </option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- SKILL LEVEL -->
+                    <div class="mt-4">
+                        <div class="form-section-title">Seviye</div>
+
+                        <!-- Percentage input -->
+                        <div class="mb-3">
+                            <label class="form-label">Yüzde (%)</label>
+                            <input name="Percentage"
+                                   type="number"
+                                   min="0"
+                                   max="100"
+                                   class="form-control"
+                                   placeholder="0 - 100"
+                                   required />
+                        </div>
+                    </div>
+
+                    <!-- DISPLAY ORDER -->
+                    <div class="mt-4">
+                        <div class="form-section-title">Sıralama</div>
+
+                        <!-- Order input -->
+                        <div class="mb-3">
+                            <input name="DisplayOrder"
+                                   type="number"
+                                   class="form-control"
+                                   placeholder="Örn: 1" />
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- RIGHT COLUMN -->
+                <div class="col-lg-4">
+
+                    <div class="form-section-title">Durum</div>
+
+                    <!-- Active/passive toggle -->
+                    <div class="status-switch">
+                        <div class="form-check form-switch m-0">
+                            <input class="form-check-input"
+                                   type="checkbox"
+                                   id="statusSwitch"
+                                   name="IsActive"
+                                   value="true"
+                                   checked />
+                        </div>
+
+                        <span id="statusText" class="status-text status-active">
+                            Aktif
+                        </span>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- FORM ACTION BUTTONS -->
+            <div class="form-actions mt-4">
+                <button class="btn btn-primary px-4">
+                    Kaydet
+                </button>
+
+                <a href="@Url.Action("Index","AdminSkill")"
+                   class="btn btn-outline-secondary">
+                    Geri
+                </a>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+<script>
+    // DOM references for status toggle behavior
+    const switchEl = document.getElementById("statusSwitch");
+    const statusText = document.getElementById("statusText");
+
+    // Update status label dynamically when switch changes
+    switchEl.addEventListener("change", function () {
+        if (this.checked) {
+            statusText.textContent = "Aktif";
+            statusText.classList.remove("status-passive");
+            statusText.classList.add("status-active");
+        } else {
+            statusText.textContent = "Pasif";
+            statusText.classList.remove("status-active");
+            statusText.classList.add("status-passive");
+        }
+    });
+</script>

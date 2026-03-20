@@ -1,0 +1,514 @@
+﻿@model List<Portfolio.Models.ProjectSections>
+
+@{
+    // Use shared admin layout
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    // Page title shown in layout/topbar
+    ViewBag.Title = "Proje Detay Bölümleri";
+
+    // Current project information passed from controller
+    var project = ViewBag.Project as Portfolio.Models.Projects;
+
+    // Resolve project preview URL for iframe
+    var previewUrl = project != null
+        ? Url.Action("Detail", "Project", new { id = project.ProjectId })
+        : "#";
+}
+
+<style>
+    /* Page header layout */
+    .section-page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Main two-column admin layout:
+       left = section table
+       right = live project preview */
+    .section-admin-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.2fr) minmax(380px, 0.8fr);
+        gap: 24px;
+        align-items: start;
+    }
+
+    /* Main card container for section table */
+    .section-table-card {
+        border: 0;
+        border-radius: 24px;
+        box-shadow: 0 12px 35px rgba(15, 23, 42, 0.06);
+    }
+
+    /* Live preview card */
+    .preview-card {
+        border: 0;
+        border-radius: 24px;
+        box-shadow: 0 12px 35px rgba(15, 23, 42, 0.06);
+        overflow: hidden;
+        position: sticky;
+        top: 96px;
+        background: #fff;
+    }
+
+    /* Preview card header */
+    .preview-card-header {
+        padding: 18px 20px;
+        border-bottom: 1px solid #eef2f7;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+    }
+
+    .preview-card-title {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 700;
+        color: #111827;
+    }
+
+    .preview-card-subtitle {
+        margin: 4px 0 0 0;
+        font-size: 0.82rem;
+        color: #6b7280;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    /* Browser-like bar for preview */
+    .preview-browser-bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 14px;
+        background: #111827;
+        color: #fff;
+        font-size: 0.8rem;
+    }
+
+    .preview-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.45);
+        flex-shrink: 0;
+    }
+
+    .preview-browser-text {
+        opacity: 0.88;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* Iframe wrapper */
+    .preview-frame-wrap {
+        height: 780px;
+        background: #e5e7eb;
+    }
+
+    /* Live page preview iframe */
+    .preview-frame {
+        width: 100%;
+        height: 100%;
+        border: 0;
+        background: #fff;
+    }
+
+    /* Table header styling */
+    .section-table thead th {
+        font-size: 0.9rem;
+        color: #6b7280;
+        font-weight: 700;
+        border-bottom: 1px solid #eef2f7;
+        background: #f8fafc;
+        padding-top: 14px;
+        padding-bottom: 14px;
+    }
+
+    /* Table body cell spacing */
+    .section-table tbody td {
+        vertical-align: middle;
+        padding-top: 16px;
+        padding-bottom: 16px;
+        border-color: #f1f5f9;
+    }
+
+    /* Table row hover effect */
+    .section-table tbody tr {
+        transition: all 0.2s ease;
+    }
+
+        .section-table tbody tr:hover {
+            background: #fafcff;
+        }
+
+    /* Section image thumbnail */
+    .section-thumb {
+        width: 80px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 10px;
+        border: 1px solid #e5e7eb;
+        background: #f8fafc;
+    }
+
+    /* Display order badge */
+    .order-badge {
+        padding: 0.45rem 0.7rem;
+        border-radius: 999px;
+        background: #f8fafc;
+        border: 1px solid #e5e7eb;
+        color: #374151;
+        font-size: 0.78rem;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    /* Status switch + label wrapper */
+    .status-wrap {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    /* Status label text */
+    .status-text {
+        font-size: 0.85rem;
+        font-weight: 600;
+        min-width: 42px;
+    }
+
+    /* Active status color */
+    .status-active {
+        color: #198754;
+    }
+
+    /* Passive status color */
+    .status-passive {
+        color: #6c757d;
+    }
+
+    /* Action button container */
+    .action-buttons {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    /* Shared table action button */
+    .table-action-btn {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+    }
+
+        .table-action-btn i {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            line-height: 1;
+            margin: 0;
+            pointer-events: none;
+        }
+
+    /* Empty state container */
+    .empty-box {
+        text-align: center;
+        padding: 48px 16px;
+        color: #6b7280;
+    }
+
+    /* Tablet layout:
+       stack table and preview vertically */
+    @@media (max-width: 1199.98px) {
+        .section-admin-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .preview-card {
+            position: static;
+        }
+
+        .preview-frame-wrap {
+            height: 620px;
+        }
+    }
+
+    /* Mobile/tablet alignment fixes */
+    @@media (max-width: 576px) {
+        .section-table td,
+        .section-table th {
+            text-align: center;
+        }
+
+        .status-wrap,
+        .action-buttons {
+            justify-content: center;
+        }
+
+        .preview-frame-wrap {
+            height: 520px;
+        }
+    }
+</style>
+
+<!-- PAGE HEADER -->
+<div class="section-page-header">
+    <div>
+        <h2 class="fw-bold mb-0">🧩 Proje Detay Bölümleri</h2>
+        <small class="text-muted">
+            @(project != null ? project.Title : "Proje")
+        </small>
+    </div>
+
+    <!-- Create new project section button -->
+    <a href="@Url.Action("Add", "AdminProjectSection", new { projectId = project.ProjectId })" class="btn btn-primary px-3">
+        <i class="bi bi-plus-circle me-1"></i> Yeni Bölüm Ekle
+    </a>
+</div>
+
+<!-- MAIN ADMIN GRID -->
+<div class="section-admin-grid">
+    <!-- LEFT: SECTION MANAGEMENT TABLE -->
+    <div class="card section-table-card">
+        <div class="card-body p-4">
+            @if (Model != null && Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table section-table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Başlık</th>
+                                <th>Görsel</th>
+                                <th>Pozisyon</th>
+                                <th>Sıra</th>
+                                <th>Durum</th>
+                                <th class="text-end">İşlem</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <!-- Section title -->
+                                    <td>
+                                        @(string.IsNullOrWhiteSpace(item.Title) ? "-" : item.Title)
+                                    </td>
+
+                                    <!-- Section image thumbnail -->
+                                    <td>
+                                        @if (!string.IsNullOrWhiteSpace(item.ImageUrl))
+                                        {
+                                            <img src="@Url.Content(item.ImageUrl)"
+                                                 class="section-thumb"
+                                                 alt="Bölüm Görseli" />
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Yok</span>
+                                        }
+                                    </td>
+
+                                    <!-- Image position info -->
+                                    <td>
+                                        @(string.IsNullOrWhiteSpace(item.ImagePosition) ? "-" : item.ImagePosition)
+                                    </td>
+
+                                    <!-- Display order -->
+                                    <td>
+                                        <span class="order-badge">
+                                            @item.DisplayOrder
+                                        </span>
+                                    </td>
+
+                                    <!-- Active/passive status with AJAX toggle -->
+                                    <td>
+                                        <div class="status-wrap">
+                                            <div class="form-check form-switch m-0">
+                                                <input class="form-check-input toggle-status"
+                                                       type="checkbox"
+                                                       data-id="@item.ProjectSectionId"
+                                                       @(item.IsActive ? "checked" : "")>
+                                            </div>
+
+                                            <span class="status-text @(item.IsActive ? "status-active" : "status-passive")">
+                                                @(item.IsActive ? "Aktif" : "Pasif")
+                                            </span>
+                                        </div>
+                                    </td>
+
+                                    <!-- Action buttons -->
+                                    <td class="text-end">
+                                        <div class="action-buttons">
+                                            <!-- Edit button -->
+                                            <a href="@Url.Action("Edit", "AdminProjectSection", new { id = item.ProjectSectionId })"
+                                               class="btn btn-sm btn-outline-warning table-action-btn"
+                                               title="Düzenle">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </a>
+
+                                            <!-- Delete form -->
+                                            <form method="post"
+                                                  action="@Url.Action("Delete", "AdminProjectSection")"
+                                                  class="delete-form m-0">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@item.ProjectSectionId" />
+
+                                                <button type="submit"
+                                                        class="btn btn-sm btn-outline-danger table-action-btn"
+                                                        title="Sil">
+                                                    <i class="bi bi-trash3"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <!-- Empty state shown when no project sections exist -->
+                <div class="empty-box">
+                    <i class="bi bi-layout-text-window-reverse fs-1 d-block mb-3"></i>
+                    <div class="fw-semibold mb-1">Henüz bölüm eklenmedi</div>
+                    <small>İlk detay bölümünü ekleyerek başlayabilirsin.</small>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- RIGHT: LIVE PROJECT DETAIL PREVIEW -->
+    @if (project != null)
+    {
+        <div class="card preview-card">
+            <div class="preview-card-header">
+                <div>
+                    <h3 class="preview-card-title">Canlı Önizleme</h3>
+                    <p class="preview-card-subtitle">
+                        Proje detay sayfasının güncel görünümü
+                    </p>
+                </div>
+
+                <!-- Open preview in a new tab -->
+                <a href="@previewUrl" target="_blank" class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-box-arrow-up-right me-1"></i> Yeni Sekmede Aç
+                </a>
+            </div>
+
+            <!-- Fake browser top bar -->
+            <div class="preview-browser-bar">
+                <span class="preview-dot"></span>
+                <span class="preview-dot"></span>
+                <span class="preview-dot"></span>
+                <span class="preview-browser-text">/Project/Detail/@project.ProjectId</span>
+            </div>
+
+            <!-- Scrollable live preview -->
+            <div class="preview-frame-wrap">
+                <iframe src="@previewUrl"
+                        class="preview-frame"
+                        title="Project Detail Preview"
+                        loading="lazy">
+                </iframe>
+            </div>
+        </div>
+    }
+</div>
+
+<script>
+    // Delete confirmation using SweetAlert2
+    document.querySelectorAll('.delete-form').forEach(form => {
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            Swal.fire({
+                title: 'Emin misin?',
+                text: 'Bu bölüm silinecek!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Evet, sil',
+                cancelButtonText: 'Vazgeç',
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+    });
+
+    // AJAX-based status toggle logic
+    document.querySelectorAll(".toggle-status").forEach(el => {
+        el.addEventListener("change", function () {
+            const checkbox = this;
+            const id = checkbox.getAttribute("data-id");
+            const statusText = checkbox.closest(".status-wrap").querySelector(".status-text");
+            const oldState = !checkbox.checked;
+
+            fetch('@Url.Action("Toggle", "AdminProjectSection")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                },
+                body: 'id=' + encodeURIComponent(id)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    if (data.status) {
+                        statusText.textContent = "Aktif";
+                        statusText.classList.remove("status-passive");
+                        statusText.classList.add("status-active");
+                    } else {
+                        statusText.textContent = "Pasif";
+                        statusText.classList.remove("status-active");
+                        statusText.classList.add("status-passive");
+                    }
+
+                    // Reload iframe after a short delay so the preview stays in sync
+                    const frame = document.querySelector('.preview-frame');
+                    if (frame) {
+                        setTimeout(() => {
+                            frame.src = frame.src;
+                        }, 250);
+                    }
+                } else {
+                    checkbox.checked = oldState;
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Hata',
+                        text: 'Durum güncellenemedi.'
+                    });
+                }
+            })
+            .catch(() => {
+                checkbox.checked = oldState;
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Hata',
+                    text: 'Bir bağlantı sorunu oluştu.'
+                });
+            });
+        });
+    });
+</script>

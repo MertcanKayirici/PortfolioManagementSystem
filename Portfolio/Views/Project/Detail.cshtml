@@ -1,0 +1,700 @@
+﻿@model Portfolio.Models.Projects
+@using System.Linq
+
+@{
+    // Use shared public layout
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    // Retrieve project detail sections from ViewBag
+    var sections = ViewBag.Sections as List<Portfolio.Models.ProjectSections>;
+
+    // Determine hero/background cover image with fallback
+    var cover = !string.IsNullOrEmpty(Model.ThumbnailUrl)
+        ? Url.Content(Model.ThumbnailUrl)
+        : Url.Content("~/Content/img/default-project.jpg");
+
+    // Parse technology list from comma-separated string
+    var techs = !string.IsNullOrWhiteSpace(Model.Technologies)
+        ? Model.Technologies.Split(',')
+            .Select(x => x.Trim())
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .ToList()
+        : new List<string>();
+}
+
+<style>
+    /* Full-screen hero section for project introduction */
+    .project-hero {
+        min-height: 100vh;
+        position: relative;
+        display: flex;
+        align-items: center;
+        background-position: center;
+        background-size: cover;
+        overflow: hidden;
+    }
+
+        /* Dark overlay for better text readability on hero image */
+        .project-hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(0,0,0,0.55), rgba(0,0,0,0.72));
+        }
+
+        /* Keep hero content above overlay */
+        .project-hero .container {
+            position: relative;
+            z-index: 2;
+            min-width: 0;
+        }
+
+        /* Shadow effect for hero title */
+        .project-hero h1 {
+            text-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+
+    /* Subtitle text style in hero section */
+    .project-hero-subtitle {
+        max-width: 760px;
+        margin: 0 auto;
+        color: rgba(255,255,255,0.88);
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    /* Action buttons below hero subtitle */
+    .hero-action-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 24px;
+    }
+
+    /* Glass-style secondary button */
+    .hero-glass-btn {
+        background: rgba(255,255,255,0.12);
+        border: 1px solid rgba(255,255,255,0.22);
+        color: #fff;
+        backdrop-filter: blur(8px);
+    }
+
+        .hero-glass-btn:hover {
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+        }
+
+    /* Overview card overlaps hero section slightly */
+    .project-overview-wrap {
+        margin-top: -70px;
+        position: relative;
+        z-index: 5;
+    }
+
+    /* Main overview card */
+    .project-overview-card {
+        background: #fff;
+        border-radius: 28px;
+        box-shadow: 0 20px 55px rgba(15, 23, 42, 0.10);
+        overflow: hidden;
+    }
+
+    /* Left side of overview card */
+    .project-overview-left {
+        padding: 2rem;
+        min-width: 0;
+    }
+
+    /* Right side of overview card */
+    .project-overview-right {
+        padding: 2rem;
+        background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+        border-left: 1px solid #eef2f7;
+        min-width: 0;
+    }
+
+    /* Small uppercase label used above headings */
+    .project-mini-label {
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #6b7280;
+        font-weight: 700;
+        margin-bottom: 10px;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    /* Summary paragraph styling */
+    .project-summary-text {
+        color: #6b7280;
+        line-height: 1.9;
+        margin-bottom: 0;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    /* Technology badge wrapper */
+    .project-techs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        min-width: 0;
+    }
+
+    /* Individual technology badge */
+    .project-tech-badge {
+        padding: 8px 14px;
+        border-radius: 999px;
+        background: #eef2ff;
+        color: #4338ca;
+        font-size: 0.82rem;
+        font-weight: 700;
+        transition: 0.2s ease;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        max-width: 100%;
+    }
+
+        .project-tech-badge:hover {
+            background: #4338ca;
+            color: #fff;
+        }
+
+    /* Wrapper for each detail section */
+    .project-section {
+        margin-bottom: 2rem;
+    }
+
+    /* Card used for mixed image/text sections */
+    .project-section-card {
+        position: relative;
+        background: #fff;
+        border-radius: 28px;
+        padding: 1.25rem;
+        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.06);
+        overflow: hidden;
+    }
+
+        /* Decorative background shape */
+        .project-section-card::before {
+            content: "";
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            top: -70px;
+            right: -70px;
+            border-radius: 50%;
+            background: rgba(79, 70, 229, 0.05);
+            pointer-events: none;
+        }
+
+        /* Decorative background shape */
+        .project-section-card::after {
+            content: "";
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            bottom: -50px;
+            left: -40px;
+            border-radius: 50%;
+            background: rgba(37, 99, 235, 0.04);
+            pointer-events: none;
+        }
+
+    /* Keep section content above decorative elements */
+    .project-section-content {
+        position: relative;
+        z-index: 2;
+        min-width: 0;
+    }
+
+    /* Text column spacing */
+    .project-text-side {
+        padding: 0 1rem 0 0.5rem;
+        min-width: 0;
+    }
+
+    /* Image column spacing */
+    .project-image-side {
+        padding: 0 0.5rem 0 1rem;
+        min-width: 0;
+    }
+
+    /* Project section image style */
+    .project-img {
+        width: 100%;
+        max-height: 360px;
+        object-fit: cover;
+        border-radius: 20px;
+        box-shadow: 0 14px 30px rgba(0,0,0,0.10);
+        border: 1px solid #eef2f7;
+        background: #fff;
+        display: block;
+    }
+
+    /* Section title styling */
+    .project-section-title {
+        position: relative;
+        display: block;
+        margin-bottom: 1rem;
+        text-align: center;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+        /* Decorative underline below section titles */
+        .project-section-title::after {
+            content: "";
+            display: block;
+            width: 56px;
+            height: 4px;
+            margin: 10px auto 0;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #2563eb, #4f46e5);
+        }
+
+    /* Paragraph text used in detail sections */
+    .project-text {
+        color: #6b7280;
+        line-height: 1.9;
+        font-size: 1rem;
+        text-align: left;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    /* Bullet list styling */
+    .project-list {
+        padding-left: 1.25rem;
+        margin-bottom: 0;
+        min-width: 0;
+    }
+
+    .project-text-side .project-list {
+        padding-left: 1.4rem;
+    }
+
+    .project-list li {
+        margin-bottom: 10px;
+        color: #374151;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+        .project-list li::marker {
+            color: #2563eb;
+        }
+
+    /* Layout used when a section contains only text */
+    .project-only-text {
+        background: #fff;
+        border-radius: 28px;
+        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.06);
+        padding: 2.25rem;
+        width: 100%;
+    }
+
+    /* Inner wrapper for text-only sections to keep width balanced */
+    .project-only-text-inner {
+        width: 100%;
+        max-width: 100%;
+        margin: 0 auto;
+        min-width: 0;
+    }
+
+    /* Centered paragraph style for text-only sections without list */
+    .project-only-text-centered {
+        width: 100%;
+        max-width: 1000px;
+        margin: 0 auto;
+        text-align: center;
+        min-width: 0;
+    }
+
+        .project-only-text-centered .project-text {
+            text-align: center;
+            margin-bottom: 0;
+        }
+
+    /* Two-column layout for description + list */
+    .project-only-split {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        align-items: stretch;
+        margin-top: 1.25rem;
+        min-width: 0;
+    }
+
+    /* Styled panel used in text-only split layout */
+    .project-only-panel {
+        background: #f8fafc;
+        border: 1px solid #eef2f7;
+        border-radius: 20px;
+        padding: 1.25rem 1.35rem;
+        min-width: 0;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+        .project-only-panel .project-text {
+            margin-bottom: 0;
+        }
+
+        .project-only-panel .project-list {
+            margin-bottom: 0;
+        }
+
+    /* Optional section button */
+    .section-button {
+        border-radius: 999px;
+        padding: 10px 18px;
+        font-weight: 600;
+        box-shadow: 0 10px 24px rgba(37, 99, 235, 0.15);
+        white-space: normal;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    /* Center button placement for text-only sections */
+    .project-only-actions {
+        display: flex;
+        justify-content: center;
+        margin-top: 1.5rem;
+    }
+
+    /* Responsive layout adjustments */
+    @@media (max-width: 991.98px) {
+        .project-overview-left,
+        .project-overview-right {
+            padding: 1.5rem;
+        }
+
+        .project-overview-right {
+            border-left: 0;
+            border-top: 1px solid #eef2f7;
+        }
+
+        .project-overview-wrap {
+            margin-top: -40px;
+        }
+
+        .project-text-side,
+        .project-image-side {
+            padding: 0;
+        }
+
+        .project-img {
+            max-height: 300px;
+        }
+
+        .project-only-split {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .project-only-text {
+            padding: 1.5rem;
+        }
+    }
+</style>
+
+<!-- HERO SECTION -->
+<section class="project-hero text-white" style="background-image:url('@cover');">
+    <div class="container text-center">
+        <!-- Main project title -->
+        <h1 class="fw-bold display-4 mb-3">@Model.Title</h1>
+
+        <!-- Optional short project summary -->
+        @if (!string.IsNullOrEmpty(Model.ShortDescription))
+        {
+            <p class="lead project-hero-subtitle mb-0">
+                @Model.ShortDescription
+            </p>
+        }
+
+        <!-- Main hero action buttons -->
+        <div class="hero-action-buttons">
+            @if (!string.IsNullOrWhiteSpace(Model.GithubUrl))
+            {
+                <a href="@Model.GithubUrl" target="_blank" class="btn btn-light btn-lg px-4">
+                    <i class="bi bi-github me-2"></i>GitHub
+                </a>
+            }
+
+            @if (!string.IsNullOrWhiteSpace(Model.LiveDemoUrl))
+            {
+                <a href="@Model.LiveDemoUrl" target="_blank" class="btn hero-glass-btn btn-lg px-4">
+                    <i class="bi bi-box-arrow-up-right me-2"></i>Canlı Demo
+                </a>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- PROJECT OVERVIEW SECTION -->
+<section class="container project-overview-wrap mb-5">
+    <div class="project-overview-card">
+        <div class="row g-0">
+            <!-- Left side: project summary -->
+            <div class="col-lg-7">
+                <div class="project-overview-left">
+                    <div class="project-mini-label">Proje Özeti</div>
+
+                    <h2 class="fw-bold mb-3">@Model.Title</h2>
+
+                    <p class="project-summary-text">
+                        @(!string.IsNullOrWhiteSpace(Model.Description)
+                            ? Model.Description
+                            : !string.IsNullOrWhiteSpace(Model.ShortDescription)
+                                ? Model.ShortDescription
+                                : "Bu proje için henüz detaylı açıklama eklenmedi.")
+                    </p>
+                </div>
+            </div>
+
+            <!-- Right side: technology badges -->
+            <div class="col-lg-5">
+                <div class="project-overview-right">
+                    @if (techs.Any())
+                    {
+                        <div class="project-mini-label">Kullanılan Teknolojiler</div>
+                        <div class="project-techs">
+                            @foreach (var tech in techs)
+                            {
+                                <span class="project-tech-badge">@tech</span>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="project-mini-label">Kullanılan Teknolojiler</div>
+                        <p class="project-summary-text mb-0">Bu proje için teknoloji bilgisi eklenmedi.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- DETAIL SECTIONS -->
+<section class="container my-5">
+    @if (sections != null && sections.Any())
+    {
+        foreach (var item in sections)
+        {
+            // Determine content layout rules for each section
+            var isLeft = (item.ImagePosition ?? "").ToLower() == "left";
+            var hasImage = !string.IsNullOrWhiteSpace(item.ImageUrl);
+            var hasTitle = !string.IsNullOrWhiteSpace(item.Title);
+            var hasDescription = !string.IsNullOrWhiteSpace(item.Description);
+            var hasBulletList = !string.IsNullOrWhiteSpace(item.BulletList);
+            var hasButton = !string.IsNullOrWhiteSpace(item.ButtonText) && !string.IsNullOrWhiteSpace(item.ButtonUrl);
+            var hasTextContent = hasTitle || hasDescription || hasBulletList || hasButton;
+            var onlyText = hasTextContent && !hasImage;
+            var onlyImage = hasImage && !hasTextContent;
+
+            List<string> bullets = new List<string>();
+            if (hasBulletList)
+            {
+                bullets = item.BulletList
+                    .Split('\n')
+                    .Select(x => x.Trim())
+                    .Where(x => !string.IsNullOrWhiteSpace(x))
+                    .ToList();
+            }
+
+            var hasRealBullets = bullets.Any();
+
+            <div class="project-section">
+                @if (onlyText)
+                {
+                    <!-- Render text-only section -->
+                    <div class="project-only-text">
+                        <div class="project-only-text-inner">
+                            @if (hasTitle)
+                            {
+                                <h3 class="fw-bold project-section-title">@item.Title</h3>
+                            }
+
+                            @if (hasDescription && hasRealBullets)
+                            {
+                                <div class="project-only-split">
+                                    @if (isLeft)
+                                    {
+                                        <!-- Left column: bullet list -->
+                                        <div class="project-only-panel">
+                                            <ul class="project-list">
+                                                @foreach (var b in bullets)
+                                                {
+                                                    <li>@b</li>
+                                                }
+                                            </ul>
+                                        </div>
+
+                                        <!-- Right column: main description -->
+                                        <div class="project-only-panel">
+                                            <p class="project-text">@item.Description</p>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <!-- Left column: main description -->
+                                        <div class="project-only-panel">
+                                            <p class="project-text">@item.Description</p>
+                                        </div>
+
+                                        <!-- Right column: bullet list -->
+                                        <div class="project-only-panel">
+                                            <ul class="project-list">
+                                                @foreach (var b in bullets)
+                                                {
+                                                    <li>@b</li>
+                                                }
+                                            </ul>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else if (hasDescription)
+                            {
+                                <!-- Centered text layout when there is only description -->
+                                <div class="project-only-text-centered">
+                                    <p class="project-text">@item.Description</p>
+                                </div>
+                            }
+                            else if (hasRealBullets)
+                            {
+                                <!-- Two-column fallback when only list exists -->
+                                <div class="project-only-split">
+                                    @if (isLeft)
+                                    {
+                                        <div class="project-only-panel">
+                                            <ul class="project-list">
+                                                @foreach (var b in bullets)
+                                                {
+                                                    <li>@b</li>
+                                                }
+                                            </ul>
+                                        </div>
+
+                                        <div class="project-only-panel d-flex align-items-center justify-content-center">
+                                            <p class="project-text text-center mb-0">Bu bölüm için açıklama eklenmedi.</p>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="project-only-panel d-flex align-items-center justify-content-center">
+                                            <p class="project-text text-center mb-0">Bu bölüm için açıklama eklenmedi.</p>
+                                        </div>
+
+                                        <div class="project-only-panel">
+                                            <ul class="project-list">
+                                                @foreach (var b in bullets)
+                                                {
+                                                    <li>@b</li>
+                                                }
+                                            </ul>
+                                        </div>
+                                    }
+                                </div>
+                            }
+
+                            @if (hasButton)
+                            {
+                                <!-- Optional centered action button -->
+                                <div class="project-only-actions">
+                                    <a href="@item.ButtonUrl" target="_blank" class="btn btn-primary section-button">
+                                        @item.ButtonText
+                                    </a>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <!-- Render mixed content section -->
+                    <div class="project-section-card">
+                        <div class="row align-items-center g-4 project-section-content">
+
+                            @if (hasImage && isLeft)
+                            {
+                                <!-- Image aligned to left -->
+                                <div class="col-md-6 project-image-side">
+                                    <img src="@Url.Content(item.ImageUrl)"
+                                         class="project-img"
+                                         alt="@(string.IsNullOrWhiteSpace(item.Title) ? Model.Title : item.Title)" />
+                                </div>
+                            }
+
+                            @if (hasTextContent)
+                            {
+                                <!-- Text content block -->
+                                <div class="col-md-6 project-text-side">
+                                    <div>
+                                        @if (hasTitle)
+                                        {
+                                            <h3 class="fw-bold project-section-title">@item.Title</h3>
+                                        }
+
+                                        @if (hasDescription)
+                                        {
+                                            <p class="project-text mb-3">
+                                                @item.Description
+                                            </p>
+                                        }
+
+                                        @if (hasRealBullets)
+                                        {
+                                            <ul class="project-list mt-3">
+                                                @foreach (var b in bullets)
+                                                {
+                                                    <li>@b</li>
+                                                }
+                                            </ul>
+                                        }
+
+                                        @if (hasButton)
+                                        {
+                                            <a href="@item.ButtonUrl"
+                                               target="_blank"
+                                               class="btn btn-primary section-button mt-2">
+                                                @item.ButtonText
+                                            </a>
+                                        }
+                                    </div>
+                                </div>
+                            }
+
+                            @if (hasImage && !isLeft)
+                            {
+                                <!-- Image aligned to right -->
+                                <div class="col-md-6 project-image-side">
+                                    <img src="@Url.Content(item.ImageUrl)"
+                                         class="project-img"
+                                         alt="@(string.IsNullOrWhiteSpace(item.Title) ? Model.Title : item.Title)" />
+                                </div>
+                            }
+
+                            @if (onlyImage)
+                            {
+                                <!-- Render image-only section -->
+                                <div class="col-md-8 mx-auto text-center">
+                                    <img src="@Url.Content(item.ImageUrl)"
+                                         class="project-img"
+                                         alt="@Model.Title" />
+                                </div>
+                            }
+
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    }
+</section>

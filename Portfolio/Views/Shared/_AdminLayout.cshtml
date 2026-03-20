@@ -1,0 +1,583 @@
+﻿@{
+    Layout = null;
+
+    // Page title fallback used in the browser tab and topbar
+    var pageTitle = ViewBag.Title ?? "Admin Panel";
+
+    // Get current controller name from route data
+    var currentController = ViewContext.RouteData.Values["controller"] != null
+        ? ViewContext.RouteData.Values["controller"].ToString()
+        : "";
+
+    // Resolve current admin username for UI display
+    var adminUsername = Session["AdminUsername"] != null
+        ? Session["AdminUsername"].ToString()
+        : "Admin";
+
+    // Returns "active" class when current controller matches the given controller name
+    Func<string, string> isActive = (controllerName) =>
+        currentController == controllerName ? "active" : "";
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@pageTitle</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        /* Global body styling */
+        body {
+            margin: 0;
+            background: #f5f7fb;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            color: #212529;
+        }
+
+        /* Main admin shell layout */
+        .admin-shell {
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* Desktop sidebar styling */
+        .admin-sidebar {
+            width: 280px;
+            min-height: 100vh;
+            background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
+            color: #fff;
+            padding: 24px 18px;
+            position: sticky;
+            top: 0;
+            box-shadow: 10px 0 30px rgba(15, 23, 42, 0.08);
+        }
+
+        /* Brand/logo container in sidebar */
+        .brand-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 28px;
+            padding: 8px 10px;
+        }
+
+        /* Brand icon style */
+        .brand-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
+            color: #fff;
+            font-size: 1.25rem;
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.35);
+        }
+
+        /* Brand title text */
+        .brand-text h4 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        /* Brand subtitle text */
+        .brand-text small {
+            color: rgba(255,255,255,0.65);
+        }
+
+        /* Section title in sidebar navigation */
+        .sidebar-section-title {
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: rgba(255,255,255,0.45);
+            margin: 18px 10px 12px;
+        }
+
+        /* Shared nav link styling for desktop and mobile menu */
+        .sidebar-nav .nav-link,
+        .offcanvas-nav .nav-link {
+            color: rgba(255,255,255,0.82);
+            border-radius: 16px;
+            padding: 12px 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+            font-weight: 500;
+            transition: all 0.25s ease;
+            text-decoration: none;
+        }
+
+            /* Icon size inside nav links */
+            .sidebar-nav .nav-link i,
+            .offcanvas-nav .nav-link i {
+                font-size: 1rem;
+            }
+
+            /* Hover state for nav links */
+            .sidebar-nav .nav-link:hover,
+            .offcanvas-nav .nav-link:hover {
+                background: rgba(255,255,255,0.08);
+                color: #fff;
+                transform: translateX(4px);
+            }
+
+            /* Active menu item style */
+            .sidebar-nav .nav-link.active,
+            .offcanvas-nav .nav-link.active {
+                background: linear-gradient(135deg, #2563eb, #4f46e5);
+                color: #fff;
+                box-shadow: 0 10px 25px rgba(37, 99, 235, 0.28);
+            }
+
+        /* Footer-style link used in navigation area */
+        .sidebar-footer-link {
+            margin-top: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: rgba(255,255,255,0.82);
+            text-decoration: none;
+            padding: 12px 14px;
+            border-radius: 16px;
+            transition: all 0.25s ease;
+        }
+
+            /* Hover state for footer links */
+            .sidebar-footer-link:hover {
+                background: rgba(255,255,255,0.08);
+                color: #fff;
+                transform: translateX(4px);
+            }
+
+        /* Special logout link styling */
+        .sidebar-logout-link {
+            color: #fecaca;
+        }
+
+            .sidebar-logout-link:hover {
+                background: rgba(239, 68, 68, 0.16);
+                color: #fff;
+            }
+
+        /* Main content wrapper */
+        .admin-main {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Topbar at the top of main admin content */
+        .admin-topbar {
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #e9ecef;
+            padding: 18px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        /* Left side of topbar */
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Mobile sidebar toggle button */
+        .menu-toggle-btn {
+            display: none;
+            border: 1px solid #e5e7eb;
+            background: #fff;
+            color: #111827;
+            border-radius: 14px;
+            width: 44px;
+            height: 44px;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+        }
+
+        /* Title block in topbar */
+        .topbar-title {
+            display: flex;
+            flex-direction: column;
+        }
+
+            /* Main topbar title */
+            .topbar-title h1 {
+                font-size: 1.2rem;
+                font-weight: 700;
+                margin: 0;
+                color: #111827;
+            }
+
+            /* Topbar subtitle */
+            .topbar-title small {
+                color: #6c757d;
+            }
+
+        /* Right side topbar actions */
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Admin user info badge in topbar */
+        .admin-userbox {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 999px;
+            padding: 8px 14px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+            color: #374151;
+            font-weight: 600;
+        }
+
+            /* Icon inside user badge */
+            .admin-userbox i {
+                font-size: 1.1rem;
+                color: #4f46e5;
+            }
+
+        /* Quick logout button in topbar */
+        .topbar-logout-btn {
+            border-radius: 999px;
+            padding: 8px 14px;
+        }
+
+        /* Main page content spacing */
+        .admin-content {
+            padding: 28px;
+        }
+
+        /* White page container used to wrap child views */
+        .page-wrapper {
+            background: #fff;
+            border-radius: 28px;
+            padding: 24px;
+            box-shadow: 0 12px 35px rgba(15, 23, 42, 0.06);
+        }
+
+        /* Dashboard card hover effect */
+        .dashboard-card {
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+
+            .dashboard-card:hover {
+                transform: translateY(-8px);
+                box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            }
+
+        /* Table row hover effect */
+        .table-hover tbody tr:hover {
+            background-color: rgba(0,0,0,0.03);
+        }
+
+        /* Shared card rounding */
+        .card {
+            border-radius: 20px;
+        }
+
+        /* Shared badge text sizing */
+        .badge {
+            font-size: 0.75rem;
+        }
+
+        /* Mobile offcanvas menu background */
+        .admin-offcanvas {
+            background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
+            color: #fff;
+        }
+
+            /* Border under offcanvas header */
+            .admin-offcanvas .offcanvas-header {
+                border-bottom: 1px solid rgba(255,255,255,0.08);
+            }
+
+            /* Light close button for dark offcanvas */
+            .admin-offcanvas .btn-close {
+                filter: invert(1) grayscale(100%) brightness(200%);
+            }
+
+        /* Responsive rules for tablet/mobile */
+        @@media (max-width: 991.98px) {
+            .admin-sidebar {
+                display: none;
+            }
+
+            .menu-toggle-btn {
+                display: inline-flex;
+            }
+
+            .admin-topbar {
+                padding: 16px 18px;
+            }
+
+            .admin-content {
+                padding: 18px;
+            }
+
+            .page-wrapper {
+                padding: 18px;
+                border-radius: 22px;
+            }
+
+            .admin-userbox {
+                font-size: 0.9rem;
+                padding: 7px 12px;
+            }
+
+            .topbar-title h1 {
+                font-size: 1.05rem;
+            }
+
+            .topbar-logout-btn {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="admin-shell">
+
+        <!-- DESKTOP SIDEBAR -->
+        <aside class="admin-sidebar">
+            <!-- Sidebar brand/header -->
+            <div class="brand-box">
+                <div class="brand-icon">
+                    <i class="bi bi-stars"></i>
+                </div>
+                <div class="brand-text">
+                    <h4>Mertcan Admin</h4>
+                    <small>Portfolio Yönetimi</small>
+                </div>
+            </div>
+
+            <!-- General navigation links -->
+            <div class="sidebar-section-title">Genel</div>
+            <nav class="nav flex-column sidebar-nav">
+                <a class="nav-link @isActive("Admin")" href="@Url.Action("Index", "Admin")">
+                    <i class="bi bi-speedometer2"></i>
+                    <span>Dashboard</span>
+                </a>
+
+                <a class="nav-link @isActive("AdminSiteSettings")" href="@Url.Action("Edit", "AdminSiteSettings")">
+                    <i class="bi bi-image"></i>
+                    <span>Site Ayarları</span>
+                </a>
+
+                <a class="nav-link @isActive("AdminAbout")" href="@Url.Action("Edit", "AdminAbout")">
+                    <i class="bi bi-person-badge"></i>
+                    <span>Hakkımda</span>
+                </a>
+
+                <a class="nav-link @isActive("AdminContactSection")" href="@Url.Action("Edit", "AdminContactSection")">
+                    <i class="bi bi-chat-left-text"></i>
+                    <span>İletişim Alanı</span>
+                </a>
+
+                <a class="nav-link @isActive("AdminLoginLog")" href="@Url.Action("Index", "AdminLoginLog")">
+                    <i class="bi bi-shield-lock"></i>
+                    <span>Giriş Logları</span>
+                </a>
+            </nav>
+
+            <!-- Content management navigation -->
+            <div class="sidebar-section-title">İçerik</div>
+            <nav class="nav flex-column sidebar-nav">
+                <a class="nav-link @isActive("AdminSkill")" href="@Url.Action("Index", "AdminSkill")">
+                    <i class="bi bi-bar-chart"></i>
+                    <span>Skills</span>
+                </a>
+
+                <a class="nav-link @isActive("AdminSkillCategory")" href="@Url.Action("Index", "AdminSkillCategory")">
+                    <i class="bi bi-palette"></i>
+                    <span>Skill Categories</span>
+                </a>
+
+                <a class="nav-link @isActive("AdminProject")" href="@Url.Action("Index", "AdminProject")">
+                    <i class="bi bi-folder"></i>
+                    <span>Projects</span>
+                </a>
+
+                <a class="nav-link @isActive("AdminMessage")" href="@Url.Action("Index", "AdminMessage")">
+                    <i class="bi bi-envelope"></i>
+                    <span>Messages</span>
+                </a>
+            </nav>
+
+            <!-- Navigation actions -->
+            <div class="sidebar-section-title">Gezinme</div>
+            <nav class="nav flex-column offcanvas-nav">
+                <a href="@Url.Action("Index", "Home")" class="sidebar-footer-link">
+                    <i class="bi bi-globe2"></i>
+                    <span>Siteyi Gör</span>
+                </a>
+
+                <a href="@Url.Action("Logout", "Auth")" class="sidebar-footer-link sidebar-logout-link">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>Çıkış Yap</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="admin-main">
+            <div class="admin-topbar">
+                <div class="topbar-left">
+                    <!-- Mobile menu toggle -->
+                    <button class="menu-toggle-btn"
+                            type="button"
+                            data-bs-toggle="offcanvas"
+                            data-bs-target="#mobileAdminMenu"
+                            aria-controls="mobileAdminMenu">
+                        <i class="bi bi-list fs-5"></i>
+                    </button>
+
+                    <!-- Page title -->
+                    <div class="topbar-title">
+                        <h1>@pageTitle</h1>
+                        <small>Yönetim alanı</small>
+                    </div>
+                </div>
+
+                <!-- Current admin/user display and quick logout -->
+                <div class="topbar-actions">
+                    <div class="admin-userbox">
+                        <i class="bi bi-person-circle"></i>
+                        <span>@adminUsername</span>
+                    </div>
+
+                    <a href="@Url.Action("Logout", "Auth")" class="btn btn-outline-danger topbar-logout-btn">
+                        <i class="bi bi-box-arrow-right me-1"></i> Çıkış
+                    </a>
+                </div>
+            </div>
+
+            <!-- Main rendered child content -->
+            <div class="admin-content">
+                <div class="page-wrapper">
+                    @RenderBody()
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MOBILE OFFCANVAS MENU -->
+    <div class="offcanvas offcanvas-start admin-offcanvas" tabindex="-1" id="mobileAdminMenu" aria-labelledby="mobileAdminMenuLabel">
+        <div class="offcanvas-header">
+            <div class="d-flex align-items-center gap-3">
+                <div class="brand-icon">
+                    <i class="bi bi-stars"></i>
+                </div>
+                <div>
+                    <h5 class="mb-0" id="mobileAdminMenuLabel">Mertcan Admin</h5>
+                    <small class="text-white-50">Portfolio Yönetimi</small>
+                </div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Kapat"></button>
+        </div>
+
+        <div class="offcanvas-body">
+            <!-- General links in mobile menu -->
+            <div class="sidebar-section-title">Genel</div>
+            <nav class="nav flex-column offcanvas-nav">
+                <a class="nav-link @isActive("Admin")" href="@Url.Action("Index", "Admin")">
+                    <i class="bi bi-speedometer2"></i>
+                    <span>Dashboard</span>
+                </a>
+
+                <a class="nav-link @isActive("AdminSiteSettings")" href="@Url.Action("Edit", "AdminSiteSettings")">
+                    <i class="bi bi-image"></i>
+                    <span>Site Ayarları</span>
+                </a>
+
+                <a class="nav-link @isActive("AdminAbout")" href="@Url.Action("Edit", "AdminAbout")">
+                    <i class="bi bi-person-badge"></i>
+                    <span>Hakkımda</span>
+                </a>
+
+                <a class="nav-link @isActive("AdminContactSection")" href="@Url.Action("Edit", "AdminContactSection")">
+                    <i class="bi bi-chat-left-text"></i>
+                    <span>İletişim Alanı</span>
+                </a>
+
+                <a class="nav-link @isActive("AdminLoginLog")" href="@Url.Action("Index", "AdminLoginLog")">
+                    <i class="bi bi-shield-lock"></i>
+                    <span>Giriş Logları</span>
+                </a>
+            </nav>
+
+            <!-- Content links in mobile menu -->
+            <div class="sidebar-section-title">İçerik</div>
+            <nav class="nav flex-column offcanvas-nav">
+                <a class="nav-link @isActive("AdminSkill")" href="@Url.Action("Index", "AdminSkill")">
+                    <i class="bi bi-bar-chart"></i>
+                    <span>Skills</span>
+                </a>
+
+                <a class="nav-link @isActive("AdminSkillCategory")" href="@Url.Action("Index", "AdminSkillCategory")">
+                    <i class="bi bi-palette"></i>
+                    <span>Skill Categories</span>
+                </a>
+
+                <a class="nav-link @isActive("AdminProject")" href="@Url.Action("Index", "AdminProject")">
+                    <i class="bi bi-folder"></i>
+                    <span>Projects</span>
+                </a>
+
+                <a class="nav-link @isActive("AdminMessage")" href="@Url.Action("Index", "AdminMessage")">
+                    <i class="bi bi-envelope"></i>
+                    <span>Messages</span>
+                </a>
+            </nav>
+
+            <!-- Footer-style navigation links in mobile menu -->
+            <div class="sidebar-section-title">Gezinme</div>
+            <nav class="nav flex-column offcanvas-nav">
+                <a href="@Url.Action("Index", "Home")" class="sidebar-footer-link">
+                    <i class="bi bi-globe2"></i>
+                    <span>Siteyi Gör</span>
+                </a>
+
+                <a href="@Url.Action("Logout", "Auth")" class="sidebar-footer-link sidebar-logout-link">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>Çıkış Yap</span>
+                </a>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Bootstrap bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Optional page-specific scripts -->
+    @RenderSection("scripts", required: false)
+</body>
+</html>

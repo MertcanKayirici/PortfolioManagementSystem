@@ -1,0 +1,156 @@
+﻿@model Portfolio.Models.ProjectSections
+
+@{
+    // Use shared admin layout
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    // Page title shown in layout/topbar
+    ViewBag.Title = "Bölüm Düzenle";
+
+    // Current project data passed from controller
+    var project = ViewBag.Project as Portfolio.Models.Projects;
+
+    // Determine current image or fallback to default
+    var image = !string.IsNullOrWhiteSpace(Model.ImageUrl)
+        ? Url.Content(Model.ImageUrl)
+        : Url.Content("~/Content/img/default-project.jpg");
+}
+
+<!-- PAGE HEADER -->
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h2 class="fw-bold mb-0">✏️ Bölüm Düzenle</h2>
+        <small class="text-muted">
+            @(project != null ? project.Title : "")
+        </small>
+    </div>
+</div>
+
+<!-- MAIN FORM CARD -->
+<div class="card shadow-lg border-0 rounded-4">
+    <div class="card-body p-4">
+
+        <!-- Form for editing an existing project section -->
+        <form method="post"
+              enctype="multipart/form-data"
+              action="@Url.Action("Edit","AdminProjectSection")">
+
+            @Html.AntiForgeryToken()
+
+            <!-- Hidden identifiers -->
+            @Html.HiddenFor(x => x.ProjectSectionId)
+            @Html.HiddenFor(x => x.ProjectId)
+
+            <!-- TITLE -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Başlık</label>
+                <input type="text" name="Title" class="form-control"
+                       value="@Model.Title" required />
+            </div>
+
+            <!-- DESCRIPTION -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Açıklama</label>
+                <textarea name="Description"
+                          class="form-control"
+                          rows="6">@Model.Description</textarea>
+            </div>
+
+            <!-- BULLET LIST (MULTILINE INPUT) -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Maddeler</label>
+                <textarea name="BulletList"
+                          class="form-control"
+                          rows="5"
+                          placeholder="Her satıra bir madde yaz">@Model.BulletList</textarea>
+            </div>
+
+            <!-- IMAGE UPLOAD -->
+            <div class="mb-4">
+                <label class="form-label fw-semibold">Görsel</label>
+
+                <!-- File input for uploading new image -->
+                <input type="file" name="imageFile" class="form-control mb-2" />
+
+                <!-- File constraints info -->
+                <div class="text-muted small mb-2">
+                    JPG, PNG, WEBP (max 5MB)
+                </div>
+
+                <!-- Current image preview -->
+                <div class="d-flex align-items-center gap-3 mt-2">
+                    <img src="@image"
+                         style="width:120px;height:80px;object-fit:cover;border-radius:12px;border:1px solid #eee;" />
+
+                    <span class="text-muted small">
+                        Mevcut görsel
+                    </span>
+                </div>
+            </div>
+
+            <!-- BUTTON SETTINGS -->
+            <div class="row">
+                <!-- Button text -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-semibold">Buton Metni</label>
+                    <input type="text"
+                           name="ButtonText"
+                           class="form-control"
+                           value="@Model.ButtonText" />
+                </div>
+
+                <!-- Button URL -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-semibold">Buton Linki</label>
+                    <input type="text"
+                           name="ButtonUrl"
+                           class="form-control"
+                           value="@Model.ButtonUrl" />
+                </div>
+            </div>
+
+            <!-- SECTION SETTINGS -->
+            <div class="row">
+                <!-- Image position (left/right) -->
+                <div class="col-md-4 mb-3">
+                    <label class="form-label fw-semibold">Görsel Pozisyonu</label>
+                    <select name="ImagePosition" class="form-select">
+                        <option value="left" @(Model.ImagePosition == "left" ? "selected" : "")>Sol</option>
+                        <option value="right" @(Model.ImagePosition == "right" ? "selected" : "")>Sağ</option>
+                    </select>
+                </div>
+
+                <!-- Display order -->
+                <div class="col-md-4 mb-3">
+                    <label class="form-label fw-semibold">Sıra</label>
+                    <input type="number"
+                           name="DisplayOrder"
+                           class="form-control"
+                           value="@Model.DisplayOrder" />
+                </div>
+
+                <!-- Active/passive status -->
+                <div class="col-md-4 mb-3">
+                    <label class="form-label fw-semibold">Durum</label>
+                    <select name="IsActive" class="form-select">
+                        <option value="true" @(Model.IsActive ? "selected" : "")>Aktif</option>
+                        <option value="false" @(!Model.IsActive ? "selected" : "")>Pasif</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- ACTION BUTTONS -->
+            <div class="d-flex gap-2 mt-3">
+                <button type="submit" class="btn btn-primary">
+                    Kaydet
+                </button>
+
+                <a href="@Url.Action("Index","AdminProjectSection", new { projectId = Model.ProjectId })"
+                   class="btn btn-secondary">
+                    Geri Dön
+                </a>
+            </div>
+
+        </form>
+    </div>
+</div>

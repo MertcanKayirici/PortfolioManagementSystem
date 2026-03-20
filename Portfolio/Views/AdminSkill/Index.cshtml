@@ -1,0 +1,521 @@
+﻿@model List<Portfolio.Models.Skills>
+
+@{
+    // Use shared admin layout
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    // Page title shown in layout/topbar
+    ViewBag.Title = "Skill Yönetimi";
+}
+
+<style>
+    /* Header area for page title and create button */
+    .skill-page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Shared card styling used across table, filters, and stat cards */
+    .skill-table-card,
+    .filter-card,
+    .mini-stat-card {
+        border: 0;
+        border-radius: 24px;
+        box-shadow: 0 12px 35px rgba(15, 23, 42, 0.06);
+    }
+
+    /* Table header styling */
+    .skill-table thead th {
+        font-size: 0.9rem;
+        color: #6b7280;
+        font-weight: 700;
+        border-bottom: 1px solid #eef2f7;
+        background: #f8fafc;
+        padding-top: 14px;
+        padding-bottom: 14px;
+    }
+
+    /* Table body cell spacing */
+    .skill-table tbody td {
+        vertical-align: middle;
+        padding-top: 16px;
+        padding-bottom: 16px;
+        border-color: #f1f5f9;
+    }
+
+    /* Table row hover transition */
+    .skill-table tbody tr {
+        transition: all 0.2s ease;
+    }
+
+        .skill-table tbody tr:hover {
+            background: #fafcff;
+        }
+
+    /* Skill name emphasis */
+    .skill-name {
+        font-weight: 700;
+        color: #111827;
+    }
+
+    /* Category badge styling */
+    .category-badge {
+        padding: 0.5rem 0.75rem;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 0.78rem;
+        background: #eef2ff;
+        color: #4338ca;
+        display: inline-block;
+    }
+
+    /* Skill level/progress wrapper */
+    .level-box {
+        min-width: 220px;
+    }
+
+    /* Top row above progress bar */
+    .level-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 6px;
+        font-size: 0.85rem;
+    }
+
+    /* Percentage text */
+    .level-percent {
+        font-weight: 700;
+        color: #374151;
+    }
+
+    /* Progress track */
+    .progress {
+        height: 10px;
+        border-radius: 999px;
+        background-color: #e9ecef;
+        overflow: hidden;
+    }
+
+    /* Progress fill */
+    .progress-bar {
+        border-radius: 999px;
+    }
+
+    /* Status switch and text wrapper */
+    .status-wrap {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    /* Status label text */
+    .status-text {
+        font-size: 0.85rem;
+        font-weight: 600;
+        min-width: 42px;
+    }
+
+    /* Active state color */
+    .status-active {
+        color: #198754;
+    }
+
+    /* Passive state color */
+    .status-passive {
+        color: #6c757d;
+    }
+
+    /* Action button container */
+    .action-buttons {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    /* Shared table action button */
+    .table-action-btn {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+    }
+
+        .table-action-btn i {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            line-height: 1;
+            margin: 0;
+        }
+
+    /* Empty state container */
+    .empty-box {
+        text-align: center;
+        padding: 48px 16px;
+        color: #6b7280;
+    }
+
+    /* Mini stat card styling */
+    .mini-stat-card {
+        padding: 18px;
+        background: #fff;
+        text-align: center;
+    }
+
+    /* Mini stat title */
+    .mini-stat-title {
+        color: #6b7280;
+        font-size: 0.82rem;
+        margin-bottom: 6px;
+    }
+
+    /* Mini stat value */
+    .mini-stat-value {
+        font-size: 1.35rem;
+        font-weight: 700;
+    }
+
+    /* Rounded filters */
+    .live-search-input,
+    .form-select {
+        border-radius: 12px;
+        min-height: 46px;
+    }
+
+    .filter-card .form-control,
+    .filter-card .form-select {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    .filter-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 6px;
+    }
+
+    /* Medium screen layout improvement */
+    @@media (max-width: 991.98px) {
+        .level-box {
+            min-width: 160px;
+        }
+    }
+
+    /* Small screen alignment adjustments */
+    @@media (max-width: 576px) {
+        .skill-table td,
+        .skill-table th {
+            text-align: center;
+        }
+
+        .action-buttons,
+        .status-wrap {
+            justify-content: center;
+        }
+
+        .level-top {
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .filter-actions .btn {
+            width: 100%;
+        }
+    }
+</style>
+
+<!-- PAGE HEADER -->
+<div class="skill-page-header">
+    <div>
+        <h2 class="fw-bold mb-0">📊 Skill Yönetimi</h2>
+        <small class="text-muted">Yetenekleri ekle, düzenle, sil ve filtrele</small>
+    </div>
+
+    <!-- Create new skill button -->
+    <a href="@Url.Action("Add", "AdminSkill")" class="btn btn-primary px-3">
+        <i class="bi bi-plus-circle me-1"></i> Yeni Skill
+    </a>
+</div>
+
+<!-- FILTER FORM CARD -->
+<div class="card filter-card mb-4">
+    <div class="card-body p-4">
+        <!-- Filter form for search, category, status, and sort -->
+        <form method="get" action="@Url.Action("Index", "AdminSkill")" id="filterForm">
+            <div class="row g-3">
+                <!-- Live search input -->
+                <div class="col-lg-4 col-md-6">
+                    <label class="form-label fw-semibold">Anlık Ara</label>
+                    <input type="text"
+                           id="liveSearch"
+                           name="keyword"
+                           value="@ViewBag.Keyword"
+                           class="form-control live-search-input"
+                           placeholder="Skill adı ara..." />
+                </div>
+
+                <!-- Category filter -->
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label fw-semibold">Kategori</label>
+                    <select name="category" class="form-select">
+                        <option value="">Tüm Kategoriler</option>
+                        @if (ViewBag.Categories != null)
+                        {
+                            foreach (var cat in ViewBag.Categories)
+                            {
+                                <option value="@cat.CategoryName" @(ViewBag.Category == cat.CategoryName ? "selected" : "")>
+                                    @cat.DisplayName
+                                </option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <!-- Status filter -->
+                <div class="col-lg-2 col-md-6">
+                    <label class="form-label fw-semibold">Durum</label>
+                    <select name="status" class="form-select">
+                        <option value="">Tümü</option>
+                        <option value="active" @(ViewBag.Status == "active" ? "selected" : "")>Aktif</option>
+                        <option value="passive" @(ViewBag.Status == "passive" ? "selected" : "")>Pasif</option>
+                    </select>
+                </div>
+
+                <!-- Sorting options -->
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label fw-semibold">Sırala</label>
+                    <select name="sort" class="form-select">
+                        <option value="order_asc" @(ViewBag.Sort == "order_asc" ? "selected" : "")>Sıra Artan</option>
+                        <option value="order_desc" @(ViewBag.Sort == "order_desc" ? "selected" : "")>Sıra Azalan</option>
+                        <option value="name_asc" @(ViewBag.Sort == "name_asc" ? "selected" : "")>Ad A-Z</option>
+                        <option value="name_desc" @(ViewBag.Sort == "name_desc" ? "selected" : "")>Ad Z-A</option>
+                        <option value="percent_desc" @(ViewBag.Sort == "percent_desc" ? "selected" : "")>Yüzde Çoktan Aza</option>
+                        <option value="percent_asc" @(ViewBag.Sort == "percent_asc" ? "selected" : "")>Yüzde Azdan Çoğa</option>
+                    </select>
+                </div>
+
+                <!-- Filter action buttons -->
+                <div class="col-12">
+                    <div class="filter-actions">
+                        <button type="submit" class="btn btn-primary">
+                            Filtrele
+                        </button>
+                        <a href="@Url.Action("Index", "AdminSkill")" class="btn btn-outline-secondary">
+                            Temizle
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- SKILL TABLE CARD -->
+<div class="card skill-table-card">
+    <div class="card-body p-4">
+        @if (Model != null && Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table skill-table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Skill</th>
+                            <th>Kategori</th>
+                            <th>Seviye</th>
+                            <th>Durum</th>
+                            <th class="text-end">İşlemler</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <!-- Skill name -->
+                                <td>
+                                    <div class="skill-name">@item.Name</div>
+                                </td>
+
+                                <!-- Category badge -->
+                                <td>
+                                    <span class="category-badge">
+                                        @item.Category
+                                    </span>
+                                </td>
+
+                                <!-- Percentage/progress display -->
+                                <td>
+                                    <div class="level-box">
+                                        <div class="level-top">
+                                            <span class="text-muted">Seviye</span>
+                                            <span class="level-percent">@item.Percentage%</span>
+                                        </div>
+
+                                        <div class="progress">
+                                            <div class="progress-bar bg-primary"
+                                                 role="progressbar"
+                                                 style="width:@(item.Percentage)%"
+                                                 aria-valuenow="@item.Percentage"
+                                                 aria-valuemin="0"
+                                                 aria-valuemax="100">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Active/passive toggle -->
+                                <td>
+                                    <div class="status-wrap">
+                                        <div class="form-check form-switch m-0">
+                                            <input class="form-check-input toggle-status"
+                                                   type="checkbox"
+                                                   data-id="@item.SkillId"
+                                                   @(item.IsActive ? "checked" : "")>
+                                        </div>
+
+                                        <span class="status-text @(item.IsActive ? "status-active" : "status-passive")">
+                                            @(item.IsActive ? "Aktif" : "Pasif")
+                                        </span>
+                                    </div>
+                                </td>
+
+                                <!-- Action buttons -->
+                                <td class="text-end">
+                                    <div class="action-buttons">
+                                        <!-- Edit button -->
+                                        <a href="@Url.Action("Edit", "AdminSkill", new { id = item.SkillId })"
+                                           class="btn btn-sm btn-outline-warning table-action-btn"
+                                           title="Düzenle">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </a>
+
+                                        <!-- Delete form -->
+                                        <form method="post"
+                                              action="@Url.Action("Delete", "AdminSkill")"
+                                              class="delete-form m-0">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@item.SkillId" />
+
+                                            <button type="submit"
+                                                    class="btn btn-sm btn-outline-danger table-action-btn"
+                                                    title="Sil">
+                                                <i class="bi bi-trash3"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <!-- Empty state -->
+            <div class="empty-box">
+                <i class="bi bi-bar-chart-line fs-1 d-block mb-3"></i>
+                <div class="fw-semibold mb-1">Sonuç bulunamadı</div>
+                <small>Filtre kriterlerine uygun skill yok.</small>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    // Delete confirmation using SweetAlert2
+    document.querySelectorAll('.delete-form').forEach(form => {
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            Swal.fire({
+                title: 'Emin misin?',
+                text: 'Bu skill silinecek!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Evet, sil',
+                cancelButtonText: 'Vazgeç',
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+    });
+
+    // AJAX-based status toggle logic
+    document.querySelectorAll(".toggle-status").forEach(el => {
+        el.addEventListener("change", function () {
+            const checkbox = this;
+            const id = checkbox.getAttribute("data-id");
+            const statusText = checkbox.closest(".status-wrap").querySelector(".status-text");
+            const previousState = !checkbox.checked;
+
+            fetch('@Url.Action("Toggle", "AdminSkill")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                },
+                body: 'id=' + encodeURIComponent(id)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.success) {
+                    if (data.status) {
+                        statusText.textContent = "Aktif";
+                        statusText.classList.remove("status-passive");
+                        statusText.classList.add("status-active");
+                    } else {
+                        statusText.textContent = "Pasif";
+                        statusText.classList.remove("status-active");
+                        statusText.classList.add("status-passive");
+                    }
+                } else {
+                    checkbox.checked = previousState;
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Hata',
+                        text: 'Durum güncellenemedi.'
+                    });
+                }
+            })
+            .catch(() => {
+                checkbox.checked = previousState;
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Hata',
+                    text: 'Bir bağlantı sorunu oluştu.'
+                });
+            });
+        });
+    });
+
+    // Live search auto-submit behavior
+    let searchTimeout;
+    const liveSearch = document.getElementById("liveSearch");
+    const filterForm = document.getElementById("filterForm");
+
+    if (liveSearch) {
+        liveSearch.addEventListener("input", function () {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                filterForm.submit();
+            }, 400);
+        });
+    }
+</script>

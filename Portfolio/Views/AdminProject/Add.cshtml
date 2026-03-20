@@ -1,0 +1,360 @@
+﻿@model Portfolio.Models.Projects
+
+@{
+    // Use shared admin layout
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    // Page title shown in layout/topbar
+    ViewBag.Title = "Proje Ekle";
+
+    // Default fallback image used before a custom project image is selected
+    var defaultProjectImage = Url.Content("~/Content/img/default-project.jpg");
+}
+
+<style>
+    /* Main add form card container */
+    .project-add-card {
+        border-radius: 24px;
+    }
+
+    /* Preview panel used for image upload area */
+    .preview-panel {
+        border-radius: 20px;
+        background: #f8f9fa;
+    }
+
+    /* Project image preview styling */
+    .project-preview {
+        width: 100%;
+        max-height: 320px;
+        object-fit: cover;
+        border-radius: 18px;
+    }
+
+    /* Small uppercase section title */
+    .form-section-title {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-bottom: 1rem;
+    }
+
+    /* File upload help text */
+    .file-help {
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+
+    /* Client-side error box, hidden by default */
+    .custom-error-box {
+        display: none;
+        border-radius: 16px;
+    }
+
+    /* Action bar at the bottom of the form */
+    .action-bar {
+        border-top: 1px solid #ececec;
+        margin-top: 2rem;
+        padding-top: 1.25rem;
+    }
+
+    /* Move preview column above form content on smaller screens */
+    @@media (max-width: 991.98px) {
+        .preview-column {
+            order: -1;
+        }
+    }
+</style>
+
+<!-- PAGE HEADER -->
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h2 class="fw-bold mb-0">➕ Proje Ekle</h2>
+        <small class="text-muted">Yeni proje bilgilerini ve görselini buradan ekleyebilirsin</small>
+    </div>
+</div>
+
+<!-- Server-side error message -->
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger rounded-4 shadow-sm">
+        @TempData["Error"]
+    </div>
+}
+
+<!-- Client-side validation error box -->
+<div id="clientErrorBox" class="alert alert-danger shadow-sm custom-error-box mb-4"></div>
+
+<!-- MAIN ADD FORM CARD -->
+<div class="card shadow-lg border-0 project-add-card">
+    <div class="card-body p-4 p-lg-5">
+        <!-- Form for creating a new project -->
+        <form method="post"
+              enctype="multipart/form-data"
+              action="@Url.Action("Add", "AdminProject")"
+              id="projectAddForm"
+              novalidate>
+            @Html.AntiForgeryToken()
+
+            <div class="row g-4 align-items-start">
+                <!-- LEFT COLUMN: PROJECT DATA -->
+                <div class="col-lg-7">
+                    <div class="form-section-title">Proje Bilgileri</div>
+
+                    <!-- Project title -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Başlık</label>
+                        <input type="text"
+                               name="Title"
+                               class="form-control form-control-lg"
+                               placeholder="Örn: Mini Finansal Raporlama"
+                               required
+                               maxlength="150" />
+                    </div>
+
+                    <!-- Short description -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Kısa Açıklama</label>
+                        <input type="text"
+                               name="ShortDescription"
+                               class="form-control"
+                               placeholder="Kart üzerinde gözükecek kısa açıklama"
+                               required
+                               maxlength="300" />
+                    </div>
+
+                    <!-- Main description -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Ana Açıklama</label>
+                        <textarea name="Description"
+                                  class="form-control"
+                                  rows="6"
+                                  placeholder="Proje detay sayfasında görünecek ana açıklama"></textarea>
+                    </div>
+
+                    <!-- Technologies list -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Teknolojiler</label>
+                        <input type="text"
+                               name="Technologies"
+                               class="form-control"
+                               placeholder="ASP.NET MVC, SQL Server, Bootstrap" />
+                    </div>
+
+                    <div class="row">
+                        <!-- GitHub URL -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">GitHub Linki</label>
+                            <input type="url"
+                                   name="GithubUrl"
+                                   class="form-control"
+                                   placeholder="https://github.com/..." />
+                        </div>
+
+                        <!-- Live demo URL -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">
+                                Canlı Demo Linki <span class="text-muted">(opsiyonel)</span>
+                            </label>
+                            <input type="url"
+                                   name="LiveDemoUrl"
+                                   class="form-control"
+                                   placeholder="https://..." />
+                        </div>
+                    </div>
+
+                    <!-- Display order -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Sıra</label>
+                        <input type="number"
+                               name="DisplayOrder"
+                               class="form-control"
+                               value="0"
+                               min="0" />
+                    </div>
+
+                    <!-- Project flags -->
+                    <div class="d-flex flex-wrap gap-4 mb-3">
+                        <div class="form-check">
+                            <input type="checkbox"
+                                   name="IsFeatured"
+                                   value="true"
+                                   class="form-check-input"
+                                   id="isFeatured" />
+                            <label class="form-check-label" for="isFeatured">Öne Çıkan</label>
+                        </div>
+
+                        <div class="form-check">
+                            <input type="checkbox"
+                                   name="IsActive"
+                                   value="true"
+                                   class="form-check-input"
+                                   id="isActive"
+                                   checked />
+                            <label class="form-check-label" for="isActive">Aktif</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT COLUMN: IMAGE PREVIEW -->
+                <div class="col-lg-5 preview-column">
+                    <div class="preview-panel p-3 p-lg-4 shadow-sm border h-100">
+                        <div class="form-section-title">Proje Görseli</div>
+
+                        <!-- Image file input -->
+                        <label class="form-label fw-semibold">Proje Resmi</label>
+                        <input type="file"
+                               name="imageFile"
+                               id="imageFile"
+                               class="form-control mb-3"
+                               accept=".jpg,.jpeg,.png,.webp,image/*" />
+
+                        <!-- Upload rules -->
+                        <div class="file-help mb-2">
+                            JPG, JPEG, PNG veya WEBP. Maksimum 5MB.
+                        </div>
+
+                        <!-- Inline validation message -->
+                        <div id="imageValidationMessage" class="text-danger small mb-3"></div>
+
+                        <!-- Default/new image preview -->
+                        <img id="imagePreview"
+                             src="@defaultProjectImage"
+                             alt="Önizleme"
+                             class="img-fluid shadow-sm border project-preview" />
+
+                        <!-- File state text -->
+                        <div class="mt-3 text-muted small" id="fileNameText">
+                            Henüz resim seçilmedi
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FORM ACTIONS -->
+            <div class="action-bar d-flex flex-wrap gap-2 justify-content-between align-items-center">
+                <div class="d-flex flex-wrap gap-2">
+                    <button type="submit" class="btn btn-primary px-4" id="submitBtn">
+                        Kaydet
+                    </button>
+                    <a href="@Url.Action("Index", "AdminProject")" class="btn btn-secondary">
+                        Geri Dön
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // DOM references for image validation and preview
+    const imageInput = document.getElementById("imageFile");
+    const imagePreview = document.getElementById("imagePreview");
+    const fileNameText = document.getElementById("fileNameText");
+    const projectForm = document.getElementById("projectAddForm");
+    const submitBtn = document.getElementById("submitBtn");
+    const clientErrorBox = document.getElementById("clientErrorBox");
+    const imageValidationMessage = document.getElementById("imageValidationMessage");
+
+    // Shows a client-side validation error
+    function showClientError(message) {
+        clientErrorBox.style.display = "block";
+        clientErrorBox.innerText = message;
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    // Clears client-side validation error
+    function clearClientError() {
+        clientErrorBox.style.display = "none";
+        clientErrorBox.innerText = "";
+    }
+
+    // Validates selected project image file
+    function validateImageFile(file) {
+        if (!file) return { valid: true };
+
+        const allowedTypes = [
+            "image/jpeg",
+            "image/png",
+            "image/webp"
+        ];
+
+        const allowedExtensions = [".jpg", ".jpeg", ".png", ".webp"];
+        const lowerName = file.name.toLowerCase();
+        const hasValidExtension = allowedExtensions.some(ext => lowerName.endsWith(ext));
+
+        if (!allowedTypes.includes(file.type) && !hasValidExtension) {
+            return {
+                valid: false,
+                message: "Proje görseli için yalnızca JPG, JPEG, PNG veya WEBP yükleyebilirsin."
+            };
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+            return {
+                valid: false,
+                message: "Proje görseli maksimum 5MB olabilir."
+            };
+        }
+
+        return { valid: true };
+    }
+
+    // Handles live image validation and preview
+    if (imageInput) {
+        imageInput.addEventListener("change", function () {
+            imageValidationMessage.innerText = "";
+            clearClientError();
+
+            const file = this.files[0];
+            const validation = validateImageFile(file);
+
+            if (!validation.valid) {
+                this.value = "";
+                imageValidationMessage.innerText = validation.message;
+                fileNameText.innerText = "Geçersiz dosya seçildi";
+                imagePreview.src = '@defaultProjectImage';
+                showClientError(validation.message);
+                return;
+            }
+
+            if (file) {
+                fileNameText.innerText = file.name;
+
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    imagePreview.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                fileNameText.innerText = "Henüz resim seçilmedi";
+                imagePreview.src = '@defaultProjectImage';
+            }
+        });
+    }
+
+    // Final validation before submission
+    projectForm.addEventListener("submit", function (e) {
+        clearClientError();
+        imageValidationMessage.innerText = "";
+
+        const imageFile = imageInput.files[0];
+
+        if (imageFile) {
+            const validation = validateImageFile(imageFile);
+
+            if (!validation.valid) {
+                e.preventDefault();
+                imageValidationMessage.innerText = validation.message;
+                showClientError(validation.message);
+                return;
+            }
+        }
+
+        // Prevent multiple submissions and show progress state
+        submitBtn.disabled = true;
+        submitBtn.innerText = "Kaydediliyor...";
+    });
+</script>

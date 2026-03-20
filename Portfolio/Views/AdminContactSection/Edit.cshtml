@@ -1,0 +1,610 @@
+﻿@model Portfolio.Models.ContactSectionSettings
+
+@{
+    // Use shared admin layout
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    // Page title shown in layout/topbar
+    ViewBag.Title = "İletişim Alanı Düzenle";
+}
+
+<style>
+    /* Page header layout */
+    .contact-admin-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Main admin card container */
+    .contact-admin-card {
+        border: 0;
+        border-radius: 28px;
+        box-shadow: 0 12px 35px rgba(15, 23, 42, 0.06);
+        overflow: hidden;
+    }
+
+    /* Reusable section block styling */
+    .section-block {
+        background: #fff;
+        border: 1px solid #eef2f7;
+        border-radius: 22px;
+        padding: 1.5rem;
+        margin-bottom: 1.25rem;
+    }
+
+        .section-block:last-child {
+            margin-bottom: 0;
+        }
+
+    /* Section block title layout */
+    .section-block-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 1rem;
+    }
+
+    /* Icon used in block headings */
+    .section-block-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #2563eb, #4f46e5);
+        color: #fff;
+        font-size: 1rem;
+        box-shadow: 0 10px 20px rgba(37, 99, 235, 0.18);
+        flex-shrink: 0;
+    }
+
+    .section-block-title h5 {
+        margin: 0;
+        font-weight: 700;
+    }
+
+    .section-block-title small {
+        color: #6b7280;
+        display: block;
+    }
+
+    /* Shared form label style */
+    .form-label {
+        font-weight: 600;
+        color: #374151;
+    }
+
+    /* Shared input styling */
+    .form-control {
+        border-radius: 14px;
+        padding: 11px 14px;
+        border: 1px solid #e5e7eb;
+        box-shadow: none;
+        transition: all 0.2s ease;
+    }
+
+        .form-control:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.10);
+        }
+
+    /* Textarea sizing */
+    textarea.form-control {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    /* Small helper text below fields */
+    .field-help {
+        font-size: 0.82rem;
+        color: #6b7280;
+        margin-top: 6px;
+    }
+
+    /* Grid layout for the three mini contact editors */
+    .mini-editor-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+        margin-top: 1rem;
+    }
+
+    /* Individual mini editor box */
+    .mini-editor-box {
+        border: 1px dashed #dbe3ef;
+        border-radius: 18px;
+        padding: 14px;
+        background: #f8fafc;
+        min-height: 100%;
+    }
+
+        .mini-editor-box .preview-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #eef2ff;
+            color: #4338ca;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+
+        .mini-editor-box .preview-title {
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 4px;
+        }
+
+        .mini-editor-box .preview-text {
+            color: #6b7280;
+            font-size: 0.9rem;
+            word-break: break-word;
+        }
+
+    /* Main live preview card */
+    .live-preview-card {
+        border-radius: 24px;
+        overflow: hidden;
+        background: #fff;
+        box-shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
+        border: 1px solid #eef2f7;
+    }
+
+    /* Left side of live preview */
+    .live-preview-left {
+        height: 100%;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .live-preview-left::before {
+            content: "";
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            right: -60px;
+            top: -60px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.06);
+        }
+
+        .live-preview-left::after {
+            content: "";
+            position: absolute;
+            width: 130px;
+            height: 130px;
+            left: -40px;
+            bottom: -40px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.04);
+        }
+
+    /* Ensure content stays above decorative pseudo-elements */
+    .live-preview-left-inner {
+        position: relative;
+        z-index: 2;
+    }
+
+    /* Badge shown in live preview */
+    .live-preview-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 14px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.10);
+        color: #fff;
+        font-size: 0.85rem;
+        margin-top: 1rem;
+    }
+
+    /* Right side of live preview */
+    .live-preview-right {
+        padding: 1.5rem;
+        background: #fff;
+    }
+
+    /* Grid for live contact boxes */
+    .live-preview-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    /* Individual live contact card */
+    .live-contact-box {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: #f8fafc;
+        border-radius: 16px;
+        padding: 14px;
+        border: 1px solid #eef2f7;
+        text-decoration: none;
+        color: inherit;
+        transition: 0.2s ease;
+    }
+
+        .live-contact-box:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(15, 23, 42, 0.06);
+        }
+
+    /* Icon area inside live contact card */
+    .live-contact-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #eef2ff;
+        color: #4338ca;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+
+    /* Contact title styling */
+    .live-contact-title {
+        font-weight: 700;
+        color: #111827;
+        margin-bottom: 2px;
+    }
+
+    /* Contact text styling */
+    .live-contact-text {
+        color: #6b7280;
+        font-size: 0.92rem;
+        word-break: break-word;
+    }
+
+    /* Action bar at the bottom */
+    .action-bar {
+        border-top: 1px solid #eef2f7;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    /* Save button style */
+    .save-btn {
+        border-radius: 14px;
+        padding: 11px 22px;
+        font-weight: 700;
+        box-shadow: 0 10px 24px rgba(37, 99, 235, 0.18);
+    }
+
+    /* Back button style */
+    .back-btn {
+        border-radius: 14px;
+        padding: 11px 20px;
+        font-weight: 600;
+    }
+
+    /* Responsive adjustments */
+    @@media (max-width: 991.98px) {
+        .mini-editor-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .section-block {
+            padding: 1.25rem;
+        }
+
+        .live-preview-right,
+        .live-preview-left {
+            padding: 1.25rem;
+        }
+    }
+</style>
+
+<!-- PAGE HEADER -->
+<div class="contact-admin-header">
+    <div>
+        <h2 class="fw-bold mb-0">📩 İletişim Alanı</h2>
+        <small class="text-muted">Ana sayfadaki iletişim bölümünü buradan düzenleyebilirsin</small>
+    </div>
+</div>
+
+<!-- Success message after save -->
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success rounded-4 shadow-sm border-0">
+        @TempData["Success"]
+    </div>
+}
+
+<!-- MAIN ADMIN CARD -->
+<div class="card contact-admin-card">
+    <div class="card-body p-4 p-lg-5">
+        @using (Html.BeginForm("Edit", "AdminContactSection", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="row g-4">
+                <!-- LEFT COLUMN: FORM EDITORS -->
+                <div class="col-xl-7">
+                    <!-- Main text content block -->
+                    <div class="section-block">
+                        <div class="section-block-title">
+                            <div class="section-block-icon">
+                                <i class="bi bi-chat-left-text"></i>
+                            </div>
+                            <div>
+                                <h5>Sol Yazı Alanı</h5>
+                                <small>Başlık, açıklama ve badge metnini düzenle</small>
+                            </div>
+                        </div>
+
+                        <!-- Title input -->
+                        <div class="mb-3">
+                            <label class="form-label">Başlık</label>
+                            @Html.TextBoxFor(x => x.Title, new { @class = "form-control js-live", placeholder = "Birlikte bir şeyler üretelim", data_target = "previewTitle" })
+                        </div>
+
+                        <!-- Description input -->
+                        <div class="mb-3">
+                            <label class="form-label">Açıklama</label>
+                            @Html.TextAreaFor(x => x.Description, new { @class = "form-control js-live", rows = "5", placeholder = "İletişim açıklaması...", data_target = "previewDescription" })
+                        </div>
+
+                        <!-- Badge input -->
+                        <div class="mb-0">
+                            <label class="form-label">Badge Yazısı</label>
+                            @Html.TextBoxFor(x => x.BadgeText, new { @class = "form-control js-live", placeholder = "Açık, net ve hızlı iletişim", data_target = "previewBadge" })
+                        </div>
+                    </div>
+
+                    <!-- Bottom link boxes editor -->
+                    <div class="section-block">
+                        <div class="section-block-title">
+                            <div class="section-block-icon">
+                                <i class="bi bi-grid"></i>
+                            </div>
+                            <div>
+                                <h5>Alt Link Kutuları</h5>
+                                <small>İkon, başlık, görünen yazı ve link bilgilerini düzenle</small>
+                            </div>
+                        </div>
+
+                        <div class="mini-editor-grid">
+                            <!-- BOX 1 -->
+                            <div class="mini-editor-box">
+                                <div class="preview-icon"><i class="bi bi-1-circle"></i></div>
+                                <div class="preview-title mb-3">Kutu 1</div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">İkon</label>
+                                    @Html.TextBoxFor(x => x.Box1Icon, new { @class = "form-control js-icon-live", placeholder = "bi-envelope", data_icon_target = "previewBox1Icon" })
+                                    <div class="field-help">Örn: bi-envelope</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Başlık</label>
+                                    @Html.TextBoxFor(x => x.Box1Title, new { @class = "form-control js-live", placeholder = "E-posta", data_target = "previewBox1Title" })
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Görünen Yazı</label>
+                                    @Html.TextBoxFor(x => x.Box1Text, new { @class = "form-control js-live", placeholder = "mertcan@mail.com", data_target = "previewBox1Text" })
+                                </div>
+
+                                <div class="mb-0">
+                                    <label class="form-label">Link</label>
+                                    @Html.TextBoxFor(x => x.Box1Url, new { @class = "form-control js-href-live", placeholder = "mailto:mertcan@mail.com", data_href_target = "previewBox1Link" })
+                                </div>
+                            </div>
+
+                            <!-- BOX 2 -->
+                            <div class="mini-editor-box">
+                                <div class="preview-icon"><i class="bi bi-2-circle"></i></div>
+                                <div class="preview-title mb-3">Kutu 2</div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">İkon</label>
+                                    @Html.TextBoxFor(x => x.Box2Icon, new { @class = "form-control js-icon-live", placeholder = "bi-github", data_icon_target = "previewBox2Icon" })
+                                    <div class="field-help">Örn: bi-github</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Başlık</label>
+                                    @Html.TextBoxFor(x => x.Box2Title, new { @class = "form-control js-live", placeholder = "GitHub", data_target = "previewBox2Title" })
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Görünen Yazı</label>
+                                    @Html.TextBoxFor(x => x.Box2Text, new { @class = "form-control js-live", placeholder = "github.com/mertcan", data_target = "previewBox2Text" })
+                                </div>
+
+                                <div class="mb-0">
+                                    <label class="form-label">Link</label>
+                                    @Html.TextBoxFor(x => x.Box2Url, new { @class = "form-control js-href-live", placeholder = "https://github.com/mertcan", data_href_target = "previewBox2Link" })
+                                </div>
+                            </div>
+
+                            <!-- BOX 3 -->
+                            <div class="mini-editor-box">
+                                <div class="preview-icon"><i class="bi bi-3-circle"></i></div>
+                                <div class="preview-title mb-3">Kutu 3</div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">İkon</label>
+                                    @Html.TextBoxFor(x => x.Box3Icon, new { @class = "form-control js-icon-live", placeholder = "bi-linkedin", data_icon_target = "previewBox3Icon" })
+                                    <div class="field-help">Örn: bi-linkedin</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Başlık</label>
+                                    @Html.TextBoxFor(x => x.Box3Title, new { @class = "form-control js-live", placeholder = "LinkedIn", data_target = "previewBox3Title" })
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Görünen Yazı</label>
+                                    @Html.TextBoxFor(x => x.Box3Text, new { @class = "form-control js-live", placeholder = "linkedin.com/in/mertcan", data_target = "previewBox3Text" })
+                                </div>
+
+                                <div class="mb-0">
+                                    <label class="form-label">Link</label>
+                                    @Html.TextBoxFor(x => x.Box3Url, new { @class = "form-control js-href-live", placeholder = "https://linkedin.com/in/mertcan", data_href_target = "previewBox3Link" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ACTION BUTTONS -->
+                    <div class="action-bar">
+                        <button type="submit" class="btn btn-primary save-btn">
+                            <i class="bi bi-check2-circle me-2"></i>Kaydet
+                        </button>
+
+                        <a href="@Url.Action("Index", "Admin")" class="btn btn-secondary back-btn">
+                            Geri Dön
+                        </a>
+                    </div>
+                </div>
+
+                <!-- RIGHT COLUMN: LIVE PREVIEW -->
+                <div class="col-xl-5">
+                    <div class="section-block">
+                        <div class="section-block-title">
+                            <div class="section-block-icon">
+                                <i class="bi bi-eye"></i>
+                            </div>
+                            <div>
+                                <h5>Canlı Önizleme</h5>
+                                <small>Kaydetmeden önce görünümü kontrol et</small>
+                            </div>
+                        </div>
+
+                        <div class="live-preview-card">
+                            <div class="row g-0">
+                                <!-- Left side preview -->
+                                <div class="col-12">
+                                    <div class="live-preview-left">
+                                        <div class="live-preview-left-inner">
+                                            <h3 class="fw-bold mb-3" id="previewTitle">
+                                                @(string.IsNullOrWhiteSpace(Model.Title) ? "Birlikte bir şeyler üretelim" : Model.Title)
+                                            </h3>
+
+                                            <p class="mb-0" id="previewDescription" style="color: rgba(255,255,255,0.78); line-height:1.7;">
+                                                @(string.IsNullOrWhiteSpace(Model.Description) ? "Yazılım, portfolyo, proje geliştirme ya da iş fırsatları hakkında benimle iletişime geçebilirsin." : Model.Description)
+                                            </p>
+
+                                            <div class="live-preview-badge">
+                                                <i class="bi bi-lightning-charge"></i>
+                                                <span id="previewBadge">
+                                                    @(string.IsNullOrWhiteSpace(Model.BadgeText) ? "Açık, net ve hızlı iletişim" : Model.BadgeText)
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Right side preview -->
+                                <div class="col-12">
+                                    <div class="live-preview-right">
+                                        <div class="live-preview-grid">
+                                            <!-- Preview box 1 -->
+                                            <a href="@(string.IsNullOrWhiteSpace(Model.Box1Url) ? "#" : Model.Box1Url)" target="_blank" id="previewBox1Link" class="live-contact-box">
+                                                <span class="live-contact-icon" id="previewBox1IconWrap">
+                                                    <i id="previewBox1Icon" class="bi @(string.IsNullOrWhiteSpace(Model.Box1Icon) ? "bi-envelope" : Model.Box1Icon)"></i>
+                                                </span>
+                                                <div>
+                                                    <div class="live-contact-title" id="previewBox1Title">
+                                                        @(string.IsNullOrWhiteSpace(Model.Box1Title) ? "E-posta" : Model.Box1Title)
+                                                    </div>
+                                                    <div class="live-contact-text" id="previewBox1Text">
+                                                        @(string.IsNullOrWhiteSpace(Model.Box1Text) ? "mertcan@mail.com" : Model.Box1Text)
+                                                    </div>
+                                                </div>
+                                            </a>
+
+                                            <!-- Preview box 2 -->
+                                            <a href="@(string.IsNullOrWhiteSpace(Model.Box2Url) ? "#" : Model.Box2Url)" target="_blank" id="previewBox2Link" class="live-contact-box">
+                                                <span class="live-contact-icon" id="previewBox2IconWrap">
+                                                    <i id="previewBox2Icon" class="bi @(string.IsNullOrWhiteSpace(Model.Box2Icon) ? "bi-github" : Model.Box2Icon)"></i>
+                                                </span>
+                                                <div>
+                                                    <div class="live-contact-title" id="previewBox2Title">
+                                                        @(string.IsNullOrWhiteSpace(Model.Box2Title) ? "GitHub" : Model.Box2Title)
+                                                    </div>
+                                                    <div class="live-contact-text" id="previewBox2Text">
+                                                        @(string.IsNullOrWhiteSpace(Model.Box2Text) ? "github.com/mertcan" : Model.Box2Text)
+                                                    </div>
+                                                </div>
+                                            </a>
+
+                                            <!-- Preview box 3 -->
+                                            <a href="@(string.IsNullOrWhiteSpace(Model.Box3Url) ? "#" : Model.Box3Url)" target="_blank" id="previewBox3Link" class="live-contact-box">
+                                                <span class="live-contact-icon" id="previewBox3IconWrap">
+                                                    <i id="previewBox3Icon" class="bi @(string.IsNullOrWhiteSpace(Model.Box3Icon) ? "bi-linkedin" : Model.Box3Icon)"></i>
+                                                </span>
+                                                <div>
+                                                    <div class="live-contact-title" id="previewBox3Title">
+                                                        @(string.IsNullOrWhiteSpace(Model.Box3Title) ? "LinkedIn" : Model.Box3Title)
+                                                    </div>
+                                                    <div class="live-contact-text" id="previewBox3Text">
+                                                        @(string.IsNullOrWhiteSpace(Model.Box3Text) ? "linkedin.com/in/mertcan" : Model.Box3Text)
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        // Live text preview updates
+        document.querySelectorAll(".js-live").forEach(input => {
+            input.addEventListener("input", function () {
+                const targetId = this.getAttribute("data_target");
+                const target = document.getElementById(targetId);
+                if (target) {
+                    target.textContent = this.value.trim() || target.dataset.default || "";
+                }
+            });
+        });
+
+        // Live icon class updates
+        document.querySelectorAll(".js-icon-live").forEach(input => {
+            input.addEventListener("input", function () {
+                const targetId = this.getAttribute("data_icon_target");
+                const iconEl = document.getElementById(targetId);
+                if (iconEl) {
+                    iconEl.className = "bi " + (this.value.trim() || "bi-circle");
+                }
+            });
+        });
+
+        // Live href updates for preview links
+        document.querySelectorAll(".js-href-live").forEach(input => {
+            input.addEventListener("input", function () {
+                const targetId = this.getAttribute("data_href_target");
+                const linkEl = document.getElementById(targetId);
+                if (linkEl) {
+                    linkEl.setAttribute("href", this.value.trim() || "#");
+                }
+            });
+        });
+    </script>
+}

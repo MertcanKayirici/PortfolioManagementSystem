@@ -1,0 +1,290 @@
+﻿@model Portfolio.Models.SkillCategories
+
+@{
+    // Use shared admin layout
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    // Page title shown in layout/topbar
+    ViewBag.Title = "Kategori Ekle";
+
+    // Default color used for the color picker and preview area
+    var defaultColor = "#0d6efd";
+}
+
+<style>
+    /* Main form container card */
+    .form-card {
+        border-radius: 24px;
+        border: 0;
+        box-shadow: 0 12px 35px rgba(15, 23, 42, 0.06);
+    }
+
+    /* Shared label style */
+    .form-label {
+        font-weight: 600;
+    }
+
+    /* Shared input/select styling */
+    .form-control,
+    .form-select {
+        border-radius: 14px;
+        padding: 10px 12px;
+    }
+
+        .form-control:focus,
+        .form-select:focus {
+            box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.15);
+            border-color: #2563eb;
+        }
+
+    /* Small uppercase section heading inside the form */
+    .form-section-title {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #6b7280;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    /* Status switch wrapper */
+    .status-switch {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    /* Status label text */
+    .status-text {
+        font-weight: 600;
+    }
+
+    /* Active status color */
+    .status-active {
+        color: #198754;
+    }
+
+    /* Passive status color */
+    .status-passive {
+        color: #6c757d;
+    }
+
+    /* Live color preview box */
+    .color-preview-box {
+        width: 100%;
+        min-height: 120px;
+        border-radius: 20px;
+        border: 1px solid #e5e7eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        color: #fff;
+        transition: all 0.25s ease;
+    }
+
+    /* Wrapper for color picker and hex badge */
+    .color-input-wrap {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    /* Badge showing selected hex color */
+    .color-code-badge {
+        padding: 0.55rem 0.8rem;
+        border-radius: 999px;
+        background: #f8fafc;
+        border: 1px solid #e5e7eb;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: #374151;
+    }
+
+    /* Form action button container */
+    .form-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    /* Mobile stacking for action buttons */
+    @@media (max-width: 576px) {
+        .form-actions {
+            flex-direction: column;
+        }
+
+            .form-actions .btn {
+                width: 100%;
+            }
+    }
+</style>
+
+<!-- PAGE HEADER -->
+<div class="mb-4">
+    <h2 class="fw-bold mb-1">➕ Yeni Skill Kategorisi</h2>
+    <small class="text-muted">Yeni kategori oluştur ve renk ayarla</small>
+</div>
+
+<!-- CREATE FORM CARD -->
+<div class="card form-card">
+    <div class="card-body p-4">
+
+        <!-- Form for creating a new skill category -->
+        <form method="post" action="@Url.Action("Add","AdminSkillCategory")">
+            @Html.AntiForgeryToken()
+
+            <div class="row g-4">
+
+                <!-- LEFT COLUMN: CATEGORY DATA -->
+                <div class="col-lg-8">
+
+                    <div class="form-section-title">Kategori Bilgileri</div>
+
+                    <!-- Internal/system category name -->
+                    <div class="mb-3">
+                        <label class="form-label">Sistem Kategori Adı</label>
+                        <input type="text"
+                               name="CategoryName"
+                               class="form-control form-control-lg"
+                               placeholder="Örn: Backend"
+                               required />
+                        <small class="text-muted">
+                            Skills tablosundaki diğer Category ile birebir aynı olmamalı
+                        </small>
+                    </div>
+
+                    <!-- Public display title -->
+                    <div class="mb-3">
+                        <label class="form-label">Görünen Başlık</label>
+                        <input type="text"
+                               name="DisplayName"
+                               class="form-control"
+                               placeholder="Örn: Backend Geliştirme"
+                               required />
+                    </div>
+
+                    <!-- Display order -->
+                    <div class="mb-3">
+                        <label class="form-label">Sıralama</label>
+                        <input type="number"
+                               name="DisplayOrder"
+                               class="form-control"
+                               value="0" />
+                    </div>
+
+                </div>
+
+                <!-- RIGHT COLUMN: COLOR + STATUS -->
+                <div class="col-lg-4">
+
+                    <div class="form-section-title">Renk ve Durum</div>
+
+                    <!-- Color picker -->
+                    <div class="mb-3">
+                        <label class="form-label">Renk Seç</label>
+
+                        <div class="color-input-wrap">
+                            <input type="color"
+                                   id="colorPicker"
+                                   name="HexColor"
+                                   class="form-control form-control-color"
+                                   value="@defaultColor" />
+
+                            <span id="colorCodeBadge" class="color-code-badge">
+                                @defaultColor
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Live preview box -->
+                    <div class="mb-4">
+                        <div id="colorPreviewBox"
+                             class="color-preview-box"
+                             style="background:@defaultColor;">
+                            Kategori Önizleme
+                        </div>
+                    </div>
+
+                    <!-- Active/passive status toggle -->
+                    <div class="status-switch">
+                        <div class="form-check form-switch m-0">
+                            <input class="form-check-input"
+                                   type="checkbox"
+                                   id="statusSwitch"
+                                   name="IsActive"
+                                   value="true"
+                                   checked />
+                        </div>
+
+                        <span id="statusText" class="status-text status-active">
+                            Aktif
+                        </span>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Form action buttons -->
+            <div class="form-actions mt-4">
+                <button type="submit" class="btn btn-primary px-4">
+                    Kaydet
+                </button>
+
+                <a href="@Url.Action("Index","AdminSkillCategory")"
+                   class="btn btn-outline-secondary">
+                    Geri
+                </a>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<script>
+    // DOM references used for live preview interactions
+    const colorPicker = document.getElementById("colorPicker");
+    const colorCodeBadge = document.getElementById("colorCodeBadge");
+    const colorPreviewBox = document.getElementById("colorPreviewBox");
+
+    const statusSwitch = document.getElementById("statusSwitch");
+    const statusText = document.getElementById("statusText");
+
+    const displayNameInput = document.querySelector('input[name="DisplayName"]');
+
+    // Updates color badge and preview background
+    function updateColor() {
+        const color = colorPicker.value;
+        colorCodeBadge.textContent = color;
+        colorPreviewBox.style.background = color;
+    }
+
+    // Updates preview title based on display name input
+    function updatePreviewText() {
+        colorPreviewBox.textContent = displayNameInput.value || "Kategori Önizleme";
+    }
+
+    // Updates status label text and style
+    function updateStatus() {
+        if (statusSwitch.checked) {
+            statusText.textContent = "Aktif";
+            statusText.classList.add("status-active");
+            statusText.classList.remove("status-passive");
+        } else {
+            statusText.textContent = "Pasif";
+            statusText.classList.add("status-passive");
+            statusText.classList.remove("status-active");
+        }
+    }
+
+    // Event bindings for live updates
+    colorPicker.addEventListener("input", updateColor);
+    displayNameInput.addEventListener("input", updatePreviewText);
+    statusSwitch.addEventListener("change", updateStatus);
+
+    // Initialize preview values on page load
+    updateColor();
+    updatePreviewText();
+</script>

@@ -1,0 +1,492 @@
+﻿@model List<Portfolio.Models.Messages>
+
+@{
+    // Use shared admin layout
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    // Page title shown in layout/topbar
+    ViewBag.Title = "Mesajlar";
+}
+
+<style>
+    /* Page header layout */
+    .message-page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Main card styling for message table */
+    .message-table-card {
+        border: 0;
+        border-radius: 24px;
+        box-shadow: 0 12px 35px rgba(15, 23, 42, 0.06);
+    }
+
+    /* Filter card styling */
+    .filter-card {
+        border: 0;
+        border-radius: 24px;
+        box-shadow: 0 12px 35px rgba(15, 23, 42, 0.06);
+    }
+
+    /* Table header styling */
+    .message-table thead th {
+        font-size: 0.9rem;
+        color: #6b7280;
+        font-weight: 700;
+        border-bottom: 1px solid #eef2f7;
+        background: #f8fafc;
+        padding-top: 14px;
+        padding-bottom: 14px;
+    }
+
+    /* Table body cell spacing */
+    .message-table tbody td {
+        vertical-align: middle;
+        padding-top: 16px;
+        padding-bottom: 16px;
+        border-color: #f1f5f9;
+    }
+
+    /* Table row hover animation */
+    .message-table tbody tr {
+        transition: all 0.2s ease;
+    }
+
+        .message-table tbody tr:hover {
+            background: #fafcff;
+        }
+
+    /* Highlight unread rows */
+    .unread-row {
+        background: #fff7ed;
+    }
+
+    /* Sender name styling */
+    .message-name {
+        font-weight: 700;
+        color: #111827;
+    }
+
+    /* Email badge styling */
+    .email-badge {
+        display: inline-block;
+        padding: 0.48rem 0.75rem;
+        border-radius: 999px;
+        background: #eef2ff;
+        color: #4338ca;
+        font-size: 0.78rem;
+        font-weight: 600;
+        max-width: 240px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* Subject text styling */
+    .subject-text {
+        color: #374151;
+        font-weight: 500;
+        max-width: 280px;
+    }
+
+    /* Date text styling */
+    .date-text {
+        font-size: 0.85rem;
+        color: #6b7280;
+        font-weight: 500;
+    }
+
+    /* Status toggle and label wrapper */
+    .status-wrap {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    /* Status text label */
+    .status-text {
+        font-size: 0.85rem;
+        font-weight: 600;
+        min-width: 50px;
+    }
+
+    /* Read status color */
+    .status-active {
+        color: #198754;
+    }
+
+    /* Unread/new status color */
+    .status-passive {
+        color: #dc3545;
+    }
+
+    /* Action button container */
+    .action-buttons {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    /* Shared table action button */
+    .table-action-btn {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+        vertical-align: middle;
+    }
+
+        .table-action-btn i {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            line-height: 1;
+            margin: 0;
+            pointer-events: none;
+        }
+
+    /* Delete form reset */
+    .delete-form {
+        margin: 0;
+    }
+
+    /* Empty state styling */
+    .empty-box {
+        text-align: center;
+        padding: 48px 16px;
+        color: #6b7280;
+    }
+
+    /* Filter controls */
+    .live-search-input,
+    .form-select,
+    .filter-card .form-control {
+        border-radius: 12px;
+        min-height: 46px;
+    }
+
+    .filter-card .form-control,
+    .filter-card .form-select {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    .filter-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 6px;
+    }
+
+    /* Mobile responsiveness */
+    @@media (max-width: 576px) {
+        .message-table td,
+        .message-table th {
+            text-align: center;
+        }
+
+        .email-badge,
+        .subject-text {
+            max-width: none;
+            white-space: normal;
+        }
+
+        .action-buttons,
+        .status-wrap {
+            justify-content: center;
+        }
+
+        .filter-actions .btn {
+            width: 100%;
+        }
+    }
+</style>
+
+<!-- PAGE HEADER -->
+<div class="message-page-header">
+    <div>
+        <h2 class="fw-bold mb-0">📩 Mesajlar</h2>
+        <small class="text-muted">Tüm gelen mesajlar burada listelenir</small>
+    </div>
+</div>
+
+<!-- FILTER CARD -->
+<div class="card filter-card mb-4">
+    <div class="card-body p-4">
+        <!-- Filter form for subject, read status, and date range -->
+        <form method="get" action="@Url.Action("Index", "AdminMessage")" id="filterForm">
+            <div class="row g-3">
+                <!-- Subject filter -->
+                <div class="col-lg-4 col-md-6">
+                    <label class="form-label fw-semibold">Konu</label>
+                    <select name="subject" class="form-select">
+                        <option value="">Tümü</option>
+
+                        @if (ViewBag.SubjectList != null)
+                        {
+                            foreach (var subject in ViewBag.SubjectList)
+                            {
+                                <option value="@subject"
+                                        @(ViewBag.Subject == subject ? "selected" : "")>
+                                    @subject
+                                </option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <!-- Read/unread status filter -->
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label fw-semibold">Durum</label>
+                    <select name="readStatus" class="form-select">
+                        <option value="">Tümü</option>
+                        <option value="read" @(ViewBag.ReadStatus == "read" ? "selected" : "")>Okundu</option>
+                        <option value="unread" @(ViewBag.ReadStatus == "unread" ? "selected" : "")>Okunmadı</option>
+                    </select>
+                </div>
+
+                <!-- Start date filter -->
+                <div class="col-lg-2 col-md-6">
+                    <label class="form-label fw-semibold">Başlangıç</label>
+                    <input type="date"
+                           name="startDate"
+                           value="@ViewBag.StartDate"
+                           class="form-control" />
+                </div>
+
+                <!-- End date filter -->
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label fw-semibold">Bitiş</label>
+                    <input type="date"
+                           name="endDate"
+                           value="@ViewBag.EndDate"
+                           class="form-control" />
+                </div>
+
+                <!-- Filter actions -->
+                <div class="col-12">
+                    <div class="filter-actions">
+                        <button type="submit" class="btn btn-primary">
+                            Filtrele
+                        </button>
+                        <a href="@Url.Action("Index", "AdminMessage")" class="btn btn-outline-secondary">
+                            Temizle
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Success message after deletion -->
+@if (TempData["Deleted"] != null)
+{
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: '@TempData["Deleted"]',
+            timer: 1500,
+            showConfirmButton: false
+        });
+    </script>
+}
+
+<!-- MAIN TABLE CARD -->
+<div class="card message-table-card">
+    <div class="card-body p-4">
+        @if (Model != null && Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table message-table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Ad</th>
+                            <th>Email</th>
+                            <th>Konu</th>
+                            <th>Tarih</th>
+                            <th>Durum</th>
+                            <th class="text-end">İşlemler</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr class="@(item.IsRead ? "" : "unread-row")">
+                                <!-- Sender name -->
+                                <td>
+                                    <div class="message-name">
+                                        @item.Name
+                                        @if (!item.IsRead)
+                                        {
+                                            <span class="badge bg-danger ms-2">Yeni</span>
+                                        }
+                                    </div>
+                                </td>
+
+                                <!-- Sender email -->
+                                <td>
+                                    <span class="email-badge" title="@item.Email">
+                                        @item.Email
+                                    </span>
+                                </td>
+
+                                <!-- Message subject -->
+                                <td>
+                                    <div class="subject-text">
+                                        @item.Subject
+                                    </div>
+                                </td>
+
+                                <!-- Send date -->
+                                <td>
+                                    <span class="date-text">
+                                        @item.SendDate.ToString("dd.MM.yyyy")
+                                    </span>
+                                </td>
+
+                                <!-- Read/unread status toggle -->
+                                <td>
+                                    <div class="status-wrap">
+                                        <div class="form-check form-switch m-0">
+                                            <input class="form-check-input toggle-read"
+                                                   type="checkbox"
+                                                   data-id="@item.MessageId"
+                                                   @(item.IsRead ? "checked" : "")>
+                                        </div>
+
+                                        <span class="status-text @(item.IsRead ? "status-active" : "status-passive")">
+                                            @(item.IsRead ? "Okundu" : "Yeni")
+                                        </span>
+                                    </div>
+                                </td>
+
+                                <!-- Action buttons -->
+                                <td class="text-end">
+                                    <div class="action-buttons">
+                                        <!-- Detail/view button -->
+                                        <a href="@Url.Action("Detail","AdminMessage", new { id = item.MessageId })"
+                                           class="btn btn-sm btn-outline-primary table-action-btn"
+                                           title="Detay">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+
+                                        <!-- Delete form -->
+                                        <form method="post"
+                                              action="@Url.Action("Delete","AdminMessage")"
+                                              class="delete-form">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@item.MessageId" />
+
+                                            <button type="submit"
+                                                    class="btn btn-sm btn-outline-danger table-action-btn"
+                                                    title="Sil">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <!-- Empty state -->
+            <div class="empty-box">
+                <i class="bi bi-envelope fs-1 d-block mb-3"></i>
+                <div class="fw-semibold mb-1">Sonuç bulunamadı</div>
+                <small>Filtre kriterlerine uygun mesaj yok.</small>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    // Delete confirmation using SweetAlert2
+    document.querySelectorAll('.delete-form').forEach(form => {
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            Swal.fire({
+                title: 'Emin misin?',
+                text: 'Bu mesaj silinecek!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Evet, sil!',
+                cancelButtonText: 'Vazgeç'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+    });
+
+    // AJAX-based read/unread toggle logic
+    document.querySelectorAll(".toggle-read").forEach(el => {
+        el.addEventListener("change", function () {
+            const checkbox = this;
+            const id = checkbox.getAttribute("data-id");
+            const statusText = checkbox.closest(".status-wrap").querySelector(".status-text");
+            const row = checkbox.closest("tr");
+            const oldState = !checkbox.checked;
+
+            fetch('@Url.Action("ToggleRead", "AdminMessage")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                },
+                body: 'id=' + encodeURIComponent(id)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    if (data.status) {
+                        statusText.textContent = "Okundu";
+                        statusText.classList.remove("status-passive");
+                        statusText.classList.add("status-active");
+                        row.classList.remove("unread-row");
+                    } else {
+                        statusText.textContent = "Yeni";
+                        statusText.classList.remove("status-active");
+                        statusText.classList.add("status-passive");
+                        row.classList.add("unread-row");
+                    }
+                } else {
+                    checkbox.checked = oldState;
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Hata',
+                        text: 'Durum güncellenemedi.'
+                    });
+                }
+            })
+            .catch(() => {
+                checkbox.checked = oldState;
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Hata',
+                    text: 'Bir bağlantı sorunu oluştu.'
+                });
+            });
+        });
+    });
+</script>

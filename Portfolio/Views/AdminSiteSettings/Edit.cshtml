@@ -1,0 +1,317 @@
+﻿@model Portfolio.Models.SiteSettings
+
+@{
+    // Use shared admin layout
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    // Page title shown in layout/topbar
+    ViewBag.Title = "Site Ayarları";
+
+    // Current hero image path with fallback to default image
+    var currentHeroImage = !string.IsNullOrEmpty(Model.HeroBackgroundImageUrl)
+        ? Url.Content(Model.HeroBackgroundImageUrl)
+        : Url.Content("~/Content/img/default-hero.jpg");
+}
+
+<style>
+    /* Main card container for site settings form */
+    .site-settings-card {
+        border-radius: 24px;
+    }
+
+    /* Preview panel used for hero image upload area */
+    .preview-panel {
+        border-radius: 20px;
+        background: #f8f9fa;
+    }
+
+    /* Hero preview image styling */
+    .hero-preview {
+        width: 100%;
+        max-height: 320px;
+        object-fit: cover;
+        border-radius: 18px;
+    }
+
+    /* Small uppercase section title */
+    .form-section-title {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-bottom: 1rem;
+    }
+
+    /* Help text under file input */
+    .file-help {
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+
+    /* Client-side error box, hidden by default */
+    .custom-error-box {
+        display: none;
+        border-radius: 16px;
+    }
+
+    /* Action bar at the bottom of the form */
+    .action-bar {
+        border-top: 1px solid #ececec;
+        margin-top: 2rem;
+        padding-top: 1.25rem;
+    }
+
+    /* Move preview column above form on smaller screens */
+    @@media (max-width: 991.98px) {
+        .preview-column {
+            order: -1;
+        }
+    }
+</style>
+
+<!-- PAGE HEADER -->
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h2 class="fw-bold mb-0">🌐 Site Ayarları</h2>
+        <small class="text-muted">Hero alanı ve genel site bilgilerini düzenle</small>
+    </div>
+</div>
+
+<!-- Success message from server-side update -->
+@if (TempData["Updated"] != null)
+{
+    <div class="alert alert-success rounded-4 shadow-sm">
+        @TempData["Updated"]
+    </div>
+}
+
+<!-- Error message from server-side operation -->
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger rounded-4 shadow-sm">
+        @TempData["Error"]
+    </div>
+}
+
+<!-- Client-side validation error box -->
+<div id="clientErrorBox" class="alert alert-danger shadow-sm custom-error-box mb-4"></div>
+
+<!-- MAIN SETTINGS CARD -->
+<div class="card shadow-lg border-0 site-settings-card">
+    <div class="card-body p-4 p-lg-5">
+        <!-- Form for updating site settings and hero image -->
+        <form method="post"
+              enctype="multipart/form-data"
+              action="@Url.Action("Edit", "AdminSiteSettings")"
+              id="siteSettingsForm"
+              novalidate>
+            @Html.AntiForgeryToken()
+
+            <!-- Hidden primary key field -->
+            <input type="hidden" name="SiteSettingId" value="@Model.SiteSettingId" />
+
+            <div class="row g-4 align-items-start">
+                <!-- LEFT COLUMN: TEXT SETTINGS -->
+                <div class="col-lg-7">
+                    <div class="form-section-title">Metin Ayarları</div>
+
+                    <!-- Site title -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Site Başlığı</label>
+                        <input type="text"
+                               name="SiteTitle"
+                               class="form-control form-control-lg"
+                               value="@Model.SiteTitle"
+                               maxlength="150" />
+                    </div>
+
+                    <!-- Hero title -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Hero Başlığı</label>
+                        <input type="text"
+                               name="HeroTitle"
+                               class="form-control form-control-lg"
+                               value="@Model.HeroTitle"
+                               maxlength="150" />
+                    </div>
+
+                    <!-- Hero subtitle -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Hero Alt Başlığı</label>
+                        <input type="text"
+                               name="HeroSubtitle"
+                               class="form-control"
+                               value="@Model.HeroSubtitle"
+                               maxlength="250" />
+                    </div>
+
+                    <!-- Footer text -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Footer Yazısı</label>
+                        <input type="text"
+                               name="FooterText"
+                               class="form-control"
+                               value="@Model.FooterText"
+                               maxlength="200" />
+                    </div>
+                </div>
+
+                <!-- RIGHT COLUMN: HERO IMAGE PREVIEW AND FILE INPUT -->
+                <div class="col-lg-5 preview-column">
+                    <div class="preview-panel p-3 p-lg-4 shadow-sm border h-100">
+                        <div class="form-section-title">Hero Görseli</div>
+
+                        <!-- File input for hero image -->
+                        <label class="form-label fw-semibold">Hero Resmi</label>
+                        <input type="file"
+                               name="heroImageFile"
+                               id="heroImageFile"
+                               class="form-control mb-3"
+                               accept=".jpg,.jpeg,.png,.webp,image/*" />
+
+                        <!-- Upload help text -->
+                        <div class="file-help mb-2">
+                            JPG, JPEG, PNG veya WEBP. Maksimum 5MB.
+                        </div>
+
+                        <!-- Inline validation message -->
+                        <div id="heroValidationMessage" class="text-danger small mb-3"></div>
+
+                        <!-- Current or selected hero image preview -->
+                        <img id="heroPreview"
+                             src="@currentHeroImage"
+                             class="img-fluid shadow-sm border hero-preview"
+                             alt="Hero Preview" />
+
+                        <!-- Current file information -->
+                        <div class="mt-3 text-muted small" id="heroFileName">
+                            @(string.IsNullOrEmpty(Model.HeroBackgroundImageUrl) ? "Henüz hero görseli seçilmedi" : "Mevcut hero görseli kullanılıyor")
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FORM ACTIONS -->
+            <div class="action-bar d-flex flex-wrap gap-2 justify-content-between align-items-center">
+                <div class="d-flex flex-wrap gap-2">
+                    <button type="submit" class="btn btn-primary px-4" id="saveBtn">
+                        Kaydet
+                    </button>
+                    <a href="@Url.Action("Index", "Admin")" class="btn btn-secondary">
+                        Geri Dön
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // DOM references for hero image upload and validation
+    const heroInput = document.getElementById("heroImageFile");
+    const heroPreview = document.getElementById("heroPreview");
+    const heroFileName = document.getElementById("heroFileName");
+    const heroValidationMessage = document.getElementById("heroValidationMessage");
+    const clientErrorBox = document.getElementById("clientErrorBox");
+    const siteSettingsForm = document.getElementById("siteSettingsForm");
+    const saveBtn = document.getElementById("saveBtn");
+
+    // Displays client-side validation error in a visible alert box
+    function showClientError(message) {
+        clientErrorBox.style.display = "block";
+        clientErrorBox.innerText = message;
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    // Clears client-side error box
+    function clearClientError() {
+        clientErrorBox.style.display = "none";
+        clientErrorBox.innerText = "";
+    }
+
+    // Validates selected hero image file
+    function validateHeroFile(file) {
+        if (!file) return { valid: true };
+
+        const allowedTypes = [
+            "image/jpeg",
+            "image/png",
+            "image/webp"
+        ];
+
+        const allowedExtensions = [".jpg", ".jpeg", ".png", ".webp"];
+        const lowerName = file.name.toLowerCase();
+        const hasValidExtension = allowedExtensions.some(ext => lowerName.endsWith(ext));
+
+        if (!allowedTypes.includes(file.type) && !hasValidExtension) {
+            return {
+                valid: false,
+                message: "Hero resmi için yalnızca JPG, JPEG, PNG veya WEBP yükleyebilirsin."
+            };
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+            return {
+                valid: false,
+                message: "Hero resmi maksimum 5MB olabilir."
+            };
+        }
+
+        return { valid: true };
+    }
+
+    // Handles live validation and preview when a new hero image is selected
+    if (heroInput) {
+        heroInput.addEventListener("change", function () {
+            heroValidationMessage.innerText = "";
+            clearClientError();
+
+            const file = this.files[0];
+            const validation = validateHeroFile(file);
+
+            if (!validation.valid) {
+                this.value = "";
+                heroValidationMessage.innerText = validation.message;
+                heroFileName.innerText = "Geçersiz dosya seçildi";
+                showClientError(validation.message);
+                return;
+            }
+
+            if (file) {
+                heroFileName.innerText = file.name;
+
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    heroPreview.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                heroFileName.innerText = "Henüz yeni resim seçilmedi";
+            }
+        });
+    }
+
+    // Final validation before form submission
+    siteSettingsForm.addEventListener("submit", function (e) {
+        clearClientError();
+        heroValidationMessage.innerText = "";
+
+        const heroFile = heroInput.files[0];
+
+        if (heroFile) {
+            const validation = validateHeroFile(heroFile);
+
+            if (!validation.valid) {
+                e.preventDefault();
+                heroValidationMessage.innerText = validation.message;
+                showClientError(validation.message);
+                return;
+            }
+        }
+
+        // Prevent multiple submissions and give visual feedback
+        saveBtn.disabled = true;
+        saveBtn.innerText = "Kaydediliyor...";
+    });
+</script>
