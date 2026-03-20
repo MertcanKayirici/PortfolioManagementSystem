@@ -1,50 +1,50 @@
 ﻿# 🚀 Portfolio Management System
 
-A modern **portfolio website with a powerful admin panel** built using **ASP.NET MVC, Entity Framework and SQL Server**.
+A modern and fully dynamic **portfolio management system** built with **ASP.NET MVC, Entity Framework, and SQL Server**.
 
-This project allows full control over portfolio content such as projects, skills, contact information and more through a dynamic admin panel.
+This project provides a **powerful admin panel** to manage all portfolio content including projects, skills, contact information, and more.
 
 ---
 
-## ✨ Features
+## ✨ Key Features
 
-* 🔐 Secure Admin Authentication System
-* 📂 Full CRUD operations (Projects, Skills, Messages, etc.)
+* 🔐 Authentication-based Admin Panel
+* 📂 Full CRUD Operations (Projects, Skills, Messages, etc.)
 * 🧩 Dynamic Project Detail Sections
 * ⚡ Real-time Preview System (Admin Panel)
-* 📊 Structured Database Design (Relational)
-* 🎨 Responsive UI with Bootstrap 5
-* 📝 Contact form & message management
-* 📈 Login logging system
+* 📊 Relational Database Design (SQL Server)
+* 🎨 Responsive UI (Bootstrap 5)
+* 💬 Contact & Message Management
+* 📈 Login Activity Logging System
 
 ---
 
-## 🛠️ Technologies Used
+## 🛠️ Tech Stack
 
 * ASP.NET MVC (.NET Framework)
 * Entity Framework
 * Microsoft SQL Server
 * Bootstrap 5
-* JavaScript / AJAX
+* JavaScript (AJAX)
 * HTML5 / CSS3
 
 ---
 
 ## 📸 Screenshots
 
-### 🌐 Public Pages
+### 🌐 Public Interface
 
 #### 🏠 Homepage
 
-![Homepage](Sreenshot/0_homepage.png)
+![Homepage](Screenshot/0_homepage.png)
 
-#### 🔍 Project Detail (Empty)
+#### 🔍 Project Detail (Empty State)
 
-![Project Detail Empty](Sreenshot/20_project_detail_empty.png)
+![Project Detail Empty](Screenshot/20_project_detail_empty.png)
 
-#### 🔍 Project Detail (Full)
+#### 🔍 Project Detail (Full View)
 
-![Project Detail Full](Sreenshot/21_project_detail_full.png)
+![Project Detail Full](Screenshot/21_project_detail_full.png)
 
 ---
 
@@ -52,79 +52,78 @@ This project allows full control over portfolio content such as projects, skills
 
 #### 📊 Dashboard
 
-![Dashboard](Sreenshot/1_dashboard.png)
+![Dashboard](Screenshot/1_dashboard.png)
 
 #### 🖼️ Site Settings
 
-![Site Settings](Sreenshot/2_site_settings.png)
+![Site Settings](Screenshot/2_site_settings.png)
 
 #### 👤 About Section
 
-![About](Sreenshot/3_about_edit.png)
+![About](Screenshot/3_about_edit.png)
 
-#### ⚡ Live Preview System
+#### ⚡ Real-time Preview System
 
-![Live Preview](Sreenshot/4_contact_live_preview.png)
+![Live Preview](Screenshot/4_contact_live_preview.png)
 
 #### 🧠 Skills Management
 
-![Skills](Sreenshot/5_skill_list.png)
+![Skills](Screenshot/5_skill_list.png)
 
-#### ➕ Skill Add
+#### ➕ Add Skill
 
-![Skill Add](Sreenshot/6_skill_add.png)
+![Skill Add](Screenshot/6_skill_add.png)
 
-#### ✏️ Skill Edit
+#### ✏️ Edit Skill
 
-![Skill Edit](Sreenshot/7_skill_edit.png)
+![Skill Edit](Screenshot/7_skill_edit.png)
 
 #### 🎨 Skill Categories
 
-![Skill Categories](Sreenshot/8_skill_category_list.png)
+![Skill Categories](Screenshot/8_skill_category_list.png)
 
-#### 📂 Projects
+#### 📂 Projects Management
 
-![Projects](Sreenshot/11_project_list.png)
+![Projects](Screenshot/11_project_list.png)
 
-#### ➕ Project Add
+#### ➕ Add Project
 
-![Project Add](Sreenshot/12_project_add.png)
+![Project Add](Screenshot/12_project_add.png)
 
-#### ✏️ Project Edit
+#### ✏️ Edit Project
 
-![Project Edit](Sreenshot/13_project_edit.png)
+![Project Edit](Screenshot/13_project_edit.png)
 
 #### 🧩 Project Sections
 
-![Project Sections](Sreenshot/14_project_section_list.png)
+![Project Sections](Screenshot/14_project_section_list.png)
 
 #### 💬 Messages
 
-![Messages](Sreenshot/17_messages.png)
+![Messages](Screenshot/17_messages.png)
 
 #### 🔐 Login Logs
 
-![Login Logs](Sreenshot/18_login_logs.png)
+![Login Logs](Screenshot/18_login_logs.png)
 
 #### 🔑 Login Page
 
-![Login](Sreenshot/19_login.png)
+![Login](Screenshot/19_login.png)
 
 ---
 
 ## 🧠 Database Design
 
-![Database Diagram](Sreenshot/database_diagram.png)
+![Database Diagram](Screenshot/database_diagram.png)
 
 ---
 
 ## ⚡ Highlight Feature
 
-One of the most important features of this project is the **real-time preview system in the admin panel**.
+One of the standout features of this project is the **real-time preview system** in the admin panel.
 
-While editing content (such as contact section or project details), changes can be previewed instantly before saving.
-
-This improves user experience and prevents incorrect data entry.
+While editing content such as contact information or project details, users can instantly preview changes before saving them.
+This significantly improves user experience and reduces potential errors.
 
 ---
 
@@ -136,7 +135,7 @@ This improves user experience and prevents incorrect data entry.
 git clone https://github.com/your-username/your-repo-name.git
 ```
 
-2. Open the project in **Visual Studio**
+2. Open with **Visual Studio**
 
 3. Configure your database connection in `Web.config`
 
@@ -152,11 +151,11 @@ integrated security=True;
 
 ---
 
-## 📌 Notes
+## 📌 Important Notes
 
-* Make sure SQL Server is running
+* Ensure SQL Server is running
 * Update connection string before running
-* Do not commit sensitive data
+* Do not share sensitive credentials
 
 ---
 
@@ -165,10 +164,10 @@ integrated security=True;
 **Mertcan Kayırıcı**
 
 * Backend-focused Full Stack Developer
-* ASP.NET MVC & SQL Server specialist
+* ASP.NET MVC & SQL Server
 
 ---
 
-## ⭐ Final Note
+## ⭐ Project Purpose
 
-This project was developed to demonstrate real-world portfolio management systems with a clean architecture and modern admin experience.
+This project was developed to simulate a **real-world portfolio management system**, focusing on clean architecture, dynamic content handling, and modern admin experience.
