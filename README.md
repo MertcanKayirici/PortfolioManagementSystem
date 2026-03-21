@@ -6,11 +6,15 @@ This project provides a complete solution for managing portfolio content through
 
 ---
 
-## 🎬 Demo
+### 🎬 Demo GIFs
 
-> Admin panel and portfolio system in action
+| 🔐 Login Flow |
+|------------|
+|![](Screenshots/Portfolio_Admin_Login.gif) |
 
-![Portfolio Demo](Screenshots/Portfolio.gif)
+| 🖥️ General Pages | 📦 Content Pages |
+|------------|-------------|
+| ![](Screenshots/Portfolio_Admin_Genel.gif) | ![Content Management](Screenshots/Portfolio_Admin_Icerik.gif) |
 
 ---
 
@@ -48,27 +52,57 @@ This project provides a complete solution for managing portfolio content through
 
 ## 📸 Screenshots
 
-### 📊 Admin Dashboard
+### 🌐 Homepage
+
+![](Screenshots/0_homepage.png)
+
+---
+
+### 📊 Dashboard & Settings
 
 | Dashboard | Site Settings |
 |----------|--------------|
-| ![](Screenshots/Dashboard.png) | ![](Screenshots/SiteSettings.png) |
+| ![](Screenshots/1_dashboard.png) | ![](Screenshots/2_site_settings.png) |
 
 ---
 
-### 🧩 Content Management
+### 👤 About & Live Preview
 
-| Projects | Skills |
-|---------|--------|
-| ![](Screenshots/Projects.png) | ![](Screenshots/Skills.png) |
+| About Edit | Live Preview |
+|-----------|-------------|
+| ![](Screenshots/3_about_edit.png) | ![](Screenshots/4_contact_live_preview.png) |
 
 ---
 
-### ➕ CRUD Operations
+### 🛠️ Skills Management
 
-| Add Project | Edit Project |
-|------------|--------------|
-| ![](Screenshots/AddProject.png) | ![](Screenshots/EditProject.png) |
+| Skill List | Add Skill | Edit Skill |
+|-----------|-----------|------------|
+| ![](Screenshots/5_skill_list.png) | ![](Screenshots/6_skill_add.png) | ![](Screenshots/7_skill_edit.png) |
+
+---
+
+### 🗂️ Skill Categories
+
+| List | Add | Edit |
+|------|-----|------|
+| ![](Screenshots/8_skill_category_list.png) | ![](Screenshots/9_skill_category_add.png) | ![](Screenshots/10_skill_category_edit.png) |
+
+---
+
+### 📁 Projects Management
+
+| Project List | Add Project | Edit Project |
+|--------------|------------|--------------|
+| ![](Screenshots/11_project_list.png) | ![](Screenshots/12_project_add.png) | ![](Screenshots/13_project_edit.png) |
+
+---
+
+### 🧩 Project Sections
+
+| Section List | Add Section | Edit Section |
+|--------------|------------|--------------|
+| ![](Screenshots/14_project_section_list.png) | ![](Screenshots/15_project_section_add.png) | ![](Screenshots/16_project_section_edit.png) |
 
 ---
 
@@ -76,15 +110,29 @@ This project provides a complete solution for managing portfolio content through
 
 | Messages | Login Logs |
 |----------|------------|
-| ![](Screenshots/Messages.png) | ![](Screenshots/LoginLogs.png) |
+| ![](Screenshots/17_messages.png) | ![](Screenshots/18_login_logs.png) |
 
 ---
 
-## 🧠 Database Design
+### 🔐 Authentication
 
-> Relational database structure designed for dynamic content management
+| Login |
+|------|
+| ![](Screenshots/19_login.png) |
 
-![ER Diagram](Screenshots/ERDiagram.png)
+---
+
+### 🌐 Project Detail Page
+
+| Empty | Full |
+|------|------|
+| ![](Screenshots/20_project_detail_empty.png) | ![](Screenshots/21_project_detail_full.png) |
+
+---
+
+### 🧠 Database Diagram
+
+![](Screenshots/database_diagram.png)
 
 ---
 
@@ -130,33 +178,39 @@ The system is designed with **separation of concerns** and maintainability in mi
 ### 1. Clone the repository
 ```bash
 git clone https://github.com/MertcanKayirici/PortfolioManagementSystem.git
-2. Open the project
 ```
+### 2. Open the project
+
 Open the .sln file using Visual Studio
 
 ### 3. Create database
 
 Create a database named:
-
+```bash
 PortfolioDb
+```
 ### 4. Run SQL script
 
 Execute:
-
+```bash
 Database/PortfolioDb.sql
+```
 ### 5. Configure connection string
 
-Update your Web.config:
-```bash
+Update your `Web.config`:
+
+```xml
 <connectionStrings>
   <add name="PortfolioDb"
        connectionString="Data Source=YOUR_SERVER_NAME;Initial Catalog=PortfolioDb;Integrated Security=True"
        providerName="System.Data.SqlClient" />
 </connectionStrings>
 ```
-### 6. Run the project
+- ⚠️ Make sure to replace YOUR_SERVER_NAME with your SQL Server instance name.
 
-Press F5 🚀
+## 6. Run the project
+
+Run the project using **Visual Studio (F5)** 🚀
 
 ---
 
@@ -168,11 +222,11 @@ Press F5 🚀
 ---
 
 ## 📂 Project Structure
-Controllers   → MVC Controllers  
-Models        → Entity Framework Models  
-Views         → Razor Views  
-Database      → SQL Scripts  
-Screenshots   → Images & GIF files  
+- Controllers   → MVC Controllers  
+- Models        → Entity Framework Models  
+- Views         → Razor Views  
+- Database      → SQL Scripts  
+- Screenshots   → Images & GIF files  
 
 ---
 
