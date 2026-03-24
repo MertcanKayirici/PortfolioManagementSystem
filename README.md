@@ -1,6 +1,20 @@
 # 🚀 Portfolio Management System
 
-A modern and fully dynamic **portfolio management system** built with **ASP.NET MVC, Entity Framework, and SQL Server**.
+<p align="center">
+  <img src="https://img.shields.io/badge/.NET-Framework-512BD4?style=for-the-badge&logo=dotnet&logoColor=white" />
+  <img src="https://img.shields.io/badge/ASP.NET-MVC-5C2D91?style=for-the-badge&logo=dotnet&logoColor=white" />
+  <img src="https://img.shields.io/badge/SQL-Server-CC2927?style=for-the-badge&logo=microsoftsqlserver&logoColor=white" />
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Entity-Framework-512BD4?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Bootstrap-5-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white" />
+  <img src="https://img.shields.io/badge/JavaScript-AJAX-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" />
+</p>
+
+---
+
+> ⚡ A dynamic portfolio management system with secure authentication, real-time content updates, and a fully customizable admin panel
 
 This project provides a complete solution for managing portfolio content through a powerful **admin panel**, while delivering a clean and responsive **public-facing website**.
 
@@ -10,11 +24,11 @@ This project provides a complete solution for managing portfolio content through
 
 | 🔐 Login Flow |
 |------------|
-|![](Screenshots/Portfolio_Admin_Login.gif) |
+| ![Admin Login Flow](Screenshots/Portfolio_Admin_Login.gif) |
 
 | 🖥️ General Pages | 📦 Content Pages |
 |------------|-------------|
-| ![](Screenshots/Portfolio_Admin_Genel.gif) | ![Content Management](Screenshots/Portfolio_Admin_Icerik.gif) |
+| ![Admin General Pages](Screenshots/Portfolio_Admin_Genel.gif) | ![Content Management](Screenshots/Portfolio_Admin_Icerik.gif) |
 
 ---
 
@@ -54,7 +68,9 @@ This project provides a complete solution for managing portfolio content through
 
 ### 🌐 Homepage
 
-![](Screenshots/0_homepage.png)
+| Homepage |
+|----------|
+| ![Portfolio Homepage](Screenshots/0_homepage.png) |
 
 ---
 
@@ -62,7 +78,7 @@ This project provides a complete solution for managing portfolio content through
 
 | Dashboard | Site Settings |
 |----------|--------------|
-| ![](Screenshots/1_dashboard.png) | ![](Screenshots/2_site_settings.png) |
+| ![Admin Dashboard](Screenshots/1_dashboard.png) | ![Site Settings Panel](Screenshots/2_site_settings.png) |
 
 ---
 
@@ -70,7 +86,7 @@ This project provides a complete solution for managing portfolio content through
 
 | About Edit | Live Preview |
 |-----------|-------------|
-| ![](Screenshots/3_about_edit.png) | ![](Screenshots/4_contact_live_preview.png) |
+| ![About Edit Page](Screenshots/3_about_edit.png) | ![Live Preview System](Screenshots/4_contact_live_preview.png) |
 
 ---
 
@@ -78,7 +94,7 @@ This project provides a complete solution for managing portfolio content through
 
 | Skill List | Add Skill | Edit Skill |
 |-----------|-----------|------------|
-| ![](Screenshots/5_skill_list.png) | ![](Screenshots/6_skill_add.png) | ![](Screenshots/7_skill_edit.png) |
+| ![Skill List](Screenshots/5_skill_list.png) | ![Add Skill](Screenshots/6_skill_add.png) | ![Edit Skill](Screenshots/7_skill_edit.png) |
 
 ---
 
@@ -86,7 +102,7 @@ This project provides a complete solution for managing portfolio content through
 
 | List | Add | Edit |
 |------|-----|------|
-| ![](Screenshots/8_skill_category_list.png) | ![](Screenshots/9_skill_category_add.png) | ![](Screenshots/10_skill_category_edit.png) |
+| ![Category List](Screenshots/8_skill_category_list.png) | ![Add Category](Screenshots/9_skill_category_add.png) | ![Edit Category](Screenshots/10_skill_category_edit.png) |
 
 ---
 
@@ -94,7 +110,7 @@ This project provides a complete solution for managing portfolio content through
 
 | Project List | Add Project | Edit Project |
 |--------------|------------|--------------|
-| ![](Screenshots/11_project_list.png) | ![](Screenshots/12_project_add.png) | ![](Screenshots/13_project_edit.png) |
+| ![Project List](Screenshots/11_project_list.png) | ![Add Project](Screenshots/12_project_add.png) | ![Edit Project](Screenshots/13_project_edit.png) |
 
 ---
 
@@ -102,7 +118,7 @@ This project provides a complete solution for managing portfolio content through
 
 | Section List | Add Section | Edit Section |
 |--------------|------------|--------------|
-| ![](Screenshots/14_project_section_list.png) | ![](Screenshots/15_project_section_add.png) | ![](Screenshots/16_project_section_edit.png) |
+| ![Section List](Screenshots/14_project_section_list.png) | ![Add Section](Screenshots/15_project_section_add.png) | ![Edit Section](Screenshots/16_project_section_edit.png) |
 
 ---
 
@@ -110,7 +126,7 @@ This project provides a complete solution for managing portfolio content through
 
 | Messages | Login Logs |
 |----------|------------|
-| ![](Screenshots/17_messages.png) | ![](Screenshots/18_login_logs.png) |
+| ![User Messages](Screenshots/17_messages.png) | ![Login Logs](Screenshots/18_login_logs.png) |
 
 ---
 
@@ -118,7 +134,7 @@ This project provides a complete solution for managing portfolio content through
 
 | Login |
 |------|
-| ![](Screenshots/19_login.png) |
+| ![Login Page](Screenshots/19_login.png) |
 
 ---
 
@@ -126,22 +142,26 @@ This project provides a complete solution for managing portfolio content through
 
 | Empty | Full |
 |------|------|
-| ![](Screenshots/20_project_detail_empty.png) | ![](Screenshots/21_project_detail_full.png) |
+| ![Empty Project Detail](Screenshots/20_project_detail_empty.png) | ![Full Project Detail](Screenshots/21_project_detail_full.png) |
 
 ---
 
 ### 🧠 Database Diagram
 
-![](Screenshots/database_diagram.png)
+| ER Diagram |
+|------------|
+| ![Database Schema](Screenshots/database_diagram.png) |
 
 ---
 
 ## 🚀 Key Highlights
 
-- Real-time preview system in admin panel  
-- Fully dynamic content management  
-- Secure authentication with logging system  
+- Secure authentication with activity logging  
+- Fully dynamic content management system  
+- Real-time preview functionality  
 - Clean and scalable database design  
+- Admin panel with full CRUD operations
+- Role-based admin panel structure
 
 ---
 
@@ -236,14 +256,28 @@ Mertcan Kayırıcı
 
 Backend-focused Full Stack Developer
 ASP.NET MVC & SQL Server
+---
+
+## 💡 Why This Project Matters
+
+This project demonstrates the ability to build a full-featured content management system, not just a static portfolio website.
+
+It includes:
+
+- Secure authentication and user activity tracking  
+- Dynamic content management via admin panel  
+- Real-time preview and updates  
+- Scalable database design with relational structure  
+
+This makes it closer to real-world CMS systems used in production.
 
 ---
 
 ## ⭐ Project Purpose
 
-This project was developed to simulate a real-world portfolio management system, focusing on:
+This project was built to simulate a real-world portfolio CMS system and demonstrate:
 
-Clean architecture principles
-Dynamic content management
-Admin panel usability
-Scalable database design
+- Secure authentication and authorization logic  
+- Dynamic content management  
+- Admin panel architecture  
+- Scalable relational database design  
