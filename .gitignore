@@ -24,7 +24,6 @@
 ############################################
 # NuGet
 ############################################
-packages/
 *.nupkg
 *.snupkg
 
@@ -42,7 +41,7 @@ packages/
 ############################################
 # Web.config (sensitive data)
 ############################################
-# Eðer içinde connection string varsa aç
+# EÃ°er iÃ§inde connection string varsa aÃ§
 # Web.config
 
 ############################################
@@ -72,14 +71,14 @@ publish/
 Thumbs.db
 
 ############################################
-# Node (eðer frontend eklersen)
+# Node (eÃ°er frontend eklersen)
 ############################################
 node_modules/
 
 ############################################
 # Uploads (opsiyonel)
 ############################################
-# Eðer user upload varsa aç
+# EÃ°er user upload varsa aÃ§
 # wwwroot/uploads/
 # Content/uploads/
 
